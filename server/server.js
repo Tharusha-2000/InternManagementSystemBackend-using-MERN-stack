@@ -9,9 +9,9 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(express.json());
 
-app.use("/api/users", usersRoute);
+app.use("/api/users", userRoute);
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 7000;
 
 if (process.env.NODE_ENV == "production") {
   app.use(express.static("client/build"));
