@@ -15,14 +15,14 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    isAdmin: {
-      type: Boolean,
-      default: false,
-    },
+    //roll: {
+     // type: Boolean,
+     // default: "visitor",
+    //},
   },
-  {
-    timestamps: true,
-  }
+//  {
+  //  timestamps: true,
+ // }
 );
 
 const userModel = mongoose.model("users", userSchema);

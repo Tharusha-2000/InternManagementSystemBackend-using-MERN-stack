@@ -1,6 +1,5 @@
 const express = require("express");
 const path = require("path");
-
 const app = express();
 
 const dbconfig = require("./utils/db.js");
@@ -10,7 +9,7 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(express.json());
 
-app.use("/api/users", userRoute);
+app.use("/api/users", usersRoute);
 
 const port = process.env.PORT || 5000;
 
