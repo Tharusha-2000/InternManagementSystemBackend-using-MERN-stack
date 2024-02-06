@@ -15,14 +15,8 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    //roll: {
-     // type: Boolean,
-     // default: "visitor",
-    //},
+    
   },
-//  {
-  //  timestamps: true,
- // }
 );
 
 const userModel = mongoose.model("users", userSchema);
