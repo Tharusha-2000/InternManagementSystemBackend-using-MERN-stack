@@ -1,4 +1,5 @@
 
+
 const express = require("express");
 const path = require("path");
 const morgan = require("morgan");
@@ -24,6 +25,7 @@ app.use(cors({
 app.use(express.json())
 
 app.use(cookieParser())
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 app.use(express.json());
@@ -31,6 +33,7 @@ app.use(express.json());
 app.use("/api/users", userRoute);
 
 const port = process.env.PORT || 9000;
+
 
 if (process.env.NODE_ENV == "production") {
   app.use(express.static("client/build"));
