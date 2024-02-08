@@ -1,5 +1,4 @@
-const { default: mongoose } = require("mongoose");
-mongoose.set('strictQuery', true);
+const  mongoose  = require("mongoose");
 
 var mongoURL = 'mongodb+srv://tharusha:tharusha123@cluster0.blcsaij.mongodb.net/'
 
