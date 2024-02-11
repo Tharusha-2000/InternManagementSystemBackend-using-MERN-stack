@@ -3,6 +3,39 @@ const router = express.Router();
 const User = require("../models/user");
 const { createSecretToken } = require("../utils/SecretToken");
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+router.post("/register",async (req, res, next) => {
+  
+  try {
+    const { email, password, username,role, createdAt } = req.body;
+    const existingUser = await User.findOne({ email });
+    if (existingUser) {
+      return res.json({ message: "User already exists" });
+       }
+    const user = await User.create({ email, password, username,role, createdAt });
+    const token = jwt.sign({email: user.email,role: user.role},"jwt_secret_key",{expiresIn: "1d"})
+
+    res.cookie("token", token, {
+      withCredentials: true,
+      httpOnly: false,
+      });
+    res
+      .status(201)
+      .json({ message: "User signed in successfully", success: true, user });
+    next();
+  } catch (error) {
+    console.error(error);
+  }
+
+   });
+
+
+
+
+
+
+
 
 router.post("/login", async (req, res, next) => {
   try {

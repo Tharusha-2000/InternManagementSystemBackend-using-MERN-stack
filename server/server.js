@@ -6,9 +6,7 @@ const morgan = require("morgan");
 const dbconfig = require("./utils/db.js");
 const userRoute = require("./routes/usersRoute.js");
 const app = express() 
-
-
-app.listen(8000, () => {
+app.listen(8080, () => {
   console.log("Server is running")
 })
 
