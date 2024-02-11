@@ -1,39 +1,46 @@
-
 const express = require("express");
-const path = require("path");
-const morgan = require("morgan");
-
-
-//const bodyParser = require("body-parser");
+const cors = require("cors");
+const Jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
-
-
-const app = express();
+const morgan = require("morgan");
 const dbconfig = require("./utils/db.js");
 const userRoute = require("./routes/usersRoute.js");
-const cors = require('cors');
+const app = express() 
+
+
+app.listen(8000, () => {
+  console.log("Server is running")
+})
+
+app.use(cors({
+    origin: ["http://localhost:5173"],
+    methods: ['GET', 'POST', 'PUT', "DELETE"],
+    credentials: true
+}))
 app.use(morgan('tiny'));
 
-
-// Enable CORS for all routes
-app.use(cors({
-  origin: ["http://localhost:5173"],
-  methods: ['GET', 'POST', 'PUT', "DELETE"],
-  credentials: true
-}))
 app.use(express.json())
 
 app.use(cookieParser())
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.use(express.json());
+app.use("/api/users", userRoute)
 
-app.use("/api/users", userRoute);
-
-const port = process.env.PORT || 9000;
-
-if (process.env.NODE_ENV == "production") {
-  app.use(express.static("client/build"));
-}
-
-app.listen(port, () => console.log("Node Server Started using Nodemon!"));
+app.use(express.static('Public'))
+/*
+const verifyUser = (req, res, next) => {
+    const token = req.cookies.token;
+    if(token) {
+        Jwt.verify(token, "jwt_secret_key", (err ,decoded) => {
+            if(err) return res.json({Status: false, Error: "Wrong Token"})
+            req.id = decoded.id;
+            req.role = decoded.role;
+            next()
+        })
+    } else {
+        return res.json({Status: false, Error: "Not autheticated"})
+    }
+   }
+app.get('/verify',verifyUser, (req, res)=> {
+     return res.json({Status: true, role: req.role, id: req.id})
+   })
+*/

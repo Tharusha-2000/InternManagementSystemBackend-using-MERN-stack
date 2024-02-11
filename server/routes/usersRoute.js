@@ -1,40 +1,49 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
+const { createSecretToken } = require("../utils/SecretToken");
+const bcrypt = require("bcryptjs");
 
-
-router.post("/register", async (req, res) => {
-  const { email, password, name } = req.body;
+router.post("/login", async (req, res, next) => {
   try {
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ error: "User with this email already exists." });
+    const { email, password } = req.body;
+
+    // Check if email and password are provided
+    if (!email || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
     }
 
-    const newUser = new User({ email, password , name});
-    await newUser.save();
-    res.send("User Registered Successfully");
-  } catch (error) {
-    return res.status(400).json({ error: error.message });
-  }
-});
-
-router.post("/login", async (req, res) => {
-  const { email, password } = req.body;
-  try {
+    // Find user by email
     const user = await User.findOne({ email });
+
+    // If user not found, return error
     if (!user) {
-      return res.status(400).json({ error: "User does not exist" });
+      return res.status(400).json({ message: 'Incorrect email' });
     }
 
-    if (password !== user.password) {
-      return res.status(400).json({ error: "Invalid credentials." });
+    // Compare passwords
+    const auth = await bcrypt.compare(password, user.password);
+
+    // If passwords don't match, return error
+    if (!auth) {
+      return res.status(400).json({ message: 'Incorrect password' });
     }
 
-    res.send("User Logged In Successfully");
+    // Generate and set token
+    const token = createSecretToken(user._id);
+    res.cookie("token", token, {
+      withCredentials: true,
+      httpOnly: false,
+    });
+
+    // Send success message
+    res.status(200).json({ message: "User logged in successfully", success: true });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    // Handle errors
+    console.error(error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 });
 
 module.exports = router;
+

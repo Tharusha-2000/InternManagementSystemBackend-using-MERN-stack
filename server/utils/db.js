@@ -1,18 +1,13 @@
 const  mongoose  = require("mongoose");
+require("dotenv").config();
+var mongoURL = 'mongodb+srv://IMS:IMS123@imsdb.af3d7jt.mongodb.net/'
 
-var mongoURL = 'mongodb+srv://tharusha:tharusha123@cluster0.blcsaij.mongodb.net/'
-
-mongoose.connect(process.env.MONGODB_URI || mongoURL, { useUnifiedTopology: true, useNewUrlParser: true, })
-
-
-var connection = mongoose.connection
-
-connection.on('error', () => {
-    console.log('MongDB Connection Failed')
-})
-
-connection.on('connected', () => {
-    console.log('MongoDB Connection Successful')
-})
-
-module.exports = mongoose
+mongoose.connect(process.env.MONGODB_URI || mongoURL)
+    .then(() => {
+        console.log('MongoDB Connection Successful');
+      })
+      .catch((error) => {
+        console.error('MongoDB Connection Failed:', error);
+      });
+  
+module.exports = mongoose;
