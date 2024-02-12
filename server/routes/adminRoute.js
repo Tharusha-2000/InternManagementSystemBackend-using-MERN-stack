@@ -18,7 +18,7 @@ router.post("/adminlogin", async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({ loginStatus: false, Error: "Incorrect password" });
     }
-    const isEmailValid = await UserModel.findOne({ email });
+    const isEmailValid = await User.findOne({ email });
 
     if (!isEmailValid) {
       return res.status(401).json({ loginStatus: false, Error: "Incorrect email" });
