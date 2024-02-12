@@ -6,6 +6,10 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+    hashedPassword: {
+      type: String,
+      required: false,
+    },
     password: {
       type: String,
       required: true,
@@ -19,13 +23,12 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     }
-
-
-  },
-);
+   },
+  );
    userSchema.pre("save", async function () {
-       this.password = await bcrypt.hash(this.password, 12);
-    });
+      this.hashedPassword = await bcrypt.hash(this.password, 12);
+     });
+
 
 const userModel = mongoose.model("users", userSchema);
 
