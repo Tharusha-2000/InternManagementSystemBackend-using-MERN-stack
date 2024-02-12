@@ -6,6 +6,11 @@ const morgan = require("morgan");
 const dbconfig = require("./utils/db.js");
 const userRoute = require("./routes/usersRoute.js");
 const adminRoute = require("./routes/adminRoute.js");
+const internRoute = require("./routes/internRoute.js");
+const managerRoute = require("./routes/managerRoute.js");
+const mentorRoute = require("./routes/mentorRoute.js");
+const evaluvatorRoute = require("./routes/evaluvatorRoute.js");
+
 const app = express() 
 
 
@@ -17,12 +22,18 @@ app.use(cors({
 }))
 app.use(morgan('tiny'));
 
-app.use(express.json())
+app.use(express.json());
 
-app.use(cookieParser())
+app.use(cookieParser());
 
-app.use("/api/users", userRoute)
-app.use('/api', adminRoute)
+app.use("/api/users", userRoute);
+app.use('/api/users', adminRoute);
+app.use('/api/users', internRoute);
+app.use('/api/users', managerRoute);
+app.use('/api/users', mentorRoute); 
+app.use('/api/users', evaluvatorRoute);
+
+
 
 app.use(express.static('Public'))
 const verifyUser = (req, res, next) => {

@@ -1,16 +1,18 @@
+
 const express = require("express");
 const router = express.Router();
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
-router.post("/adminlogin", async (req, res) => {
+
+router.post("/mentorlogin", async (req, res) => {
   try {
     const { email, password } = req.body;
-    const user = await User.findOne( {role: "admin"});
+    const user = await User.findOne( {role: "mentor"});
 
     if (!user) {
-      return res.status(404).json({ loginStatus: false, Error: "Admin not found" });
+      return res.status(404).json({ loginStatus: false, Error: "mentor not found" });
     }
     const isPasswordValid = await bcrypt.compare(password, user.password);
 
@@ -23,7 +25,7 @@ router.post("/adminlogin", async (req, res) => {
       return res.status(401).json({ loginStatus: false, Error: "Incorrect email" });
     }
     const token = jwt.sign(
-      { role: "admin", email: User.email, id: User._id }, "jwt_secret_key",
+      { role: "mentor", email: User.email, id: User._id }, "jwt_secret_key",
       { expiresIn: "1d" }
     );
     res.cookie('token', token);
