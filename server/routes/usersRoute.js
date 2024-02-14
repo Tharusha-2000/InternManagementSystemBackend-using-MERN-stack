@@ -6,8 +6,9 @@ const jwt = require("jsonwebtoken");
 const ENV= require('../config.js');
 const middleware = require('../middleware/auth.js');
 const Auth = middleware.Auth;
-const localVariables = middleware.localVariables;
+//const localVariables = middleware.localVariables;
 
+/* POST: http://localhost:8090/api/users/login */
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -48,27 +49,23 @@ router.post("/login", async (req, res) => {
 });
 
 
-/** GET: http://localhost:8080/api/user/example123 */
-router.get("/user/:username", async (req, res) => {
-  const { username } = req.params;
 
-  try {
+/* GET: http://localhost:8090/api/users/user/dinu */
+router.get("/user/:username", async (req, res) => {
+       const { username } = req.params;
+try {
     if (!username) return res.status(501).send({ error: "Invalid Username" });
         const user = await User.findOne({ username });
 
     if (!user) return res.status(501).send({ error: "Couldn't Find the User" });
       
-        const {password,...rest} = Object.assign({}, user.toJSON());
+        const {password,hashedPassword,...rest} = Object.assign({}, user.toJSON());
         return res.status(201).send(rest);
    
     }catch(error){
          return res.status(404).send({ error: "Cannot Find User Data" });
     }
-
-
 });
-
-
 
 
 /** PUT: http://localhost:8080/api/updateuser 
@@ -81,30 +78,30 @@ body: {
   profile : ''
 }
 */
-
-router.put('/updateuser', Auth ,async function updateUser(req,res){
+router.put('/updateuser',Auth, async (req, res) => {
+  //const id = req.query.id;
+  const { id } = req.user;
   try {
-      // const id = req.query.id;
-      const { userId } = req.user;
-      if(userId){
-          const body = req.body;
-          // update the data
-          UserModel.updateOne({ _id : userId }, body, function(err, data){
-              if(err) throw err;
-              return res.status(201).send({ msg : "Record Updated...!"});
-          })
+    
+    if (!id) {
+      return res.status(401).send({ error: "User ID not provided" });
+    }
 
-      }else{
-          return res.status(401).send({ error : "User Not Found...!"});
-      }
+    const body = req.body;
 
+    // Update the data
+    const result = await User.updateOne({ _id: id}, body);
+
+    if (result.nModified === 0) {
+      return res.status(404).send({ error: "User not found or no changes applied" });
+    }
+
+    return res.status(200).send({ msg: "Record Updated" });
   } catch (error) {
-      return res.status(401).send({ error });
+    console.error(error);
+    return res.status(500).send({ error: "Internal Server Error" });
   }
 });
-
-
-
 
 
 

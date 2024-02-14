@@ -8,11 +8,13 @@ const ENV = require('../config.js');
         
         // access authorize header to validate request
         const token = req.headers.authorization.split(" ")[1];
-
+       
         // retrive the user details fo the logged in user
         const decodedToken = await jwt.verify(token, ENV.JWT_SECRET);
 
         req.user = decodedToken;
+
+        //res.json(decodedToken);
 
         next()
 
@@ -21,10 +23,10 @@ const ENV = require('../config.js');
     }
 
 
-}
+} 
+  module.exports ={Auth};
 
-
-
+/*
 function localVariables(req, res, next){
     req.app.locals = {
         OTP : null,
@@ -32,9 +34,6 @@ function localVariables(req, res, next){
     }
     next();
 }
+*/
 
 
-module.exports = {
-    Auth,
-    localVariables
-};
