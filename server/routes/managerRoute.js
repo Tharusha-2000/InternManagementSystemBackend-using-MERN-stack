@@ -13,16 +13,17 @@ router.post("/managerlogin", async (req, res) => {
     if (!user) {
       return res.status(404).json({ loginStatus: false, Error: "manager not found" });
     }
-    const isPasswordValid = await bcrypt.compare(password, user.hashedPassword);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({ loginStatus: false, Error: "Incorrect password" });
-    }
     const isEmailValid = await User.findOne({ email });
 
     if (!isEmailValid) {
       return res.status(401).json({ loginStatus: false, Error: "Incorrect email" });
     }
+    const isPasswordValid = await bcrypt.compare(password, user.hashedPassword);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ loginStatus: false, Error: "Incorrect password" });
+    }
+   
     const token = jwt.sign(
       { role: "manager", email: User.email, id: User._id }, ENV.JWT_SECRET,
       { expiresIn: "1d" }

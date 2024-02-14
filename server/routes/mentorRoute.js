@@ -14,16 +14,17 @@ router.post("/mentorlogin", async (req, res) => {
     if (!user) {
       return res.status(404).json({ loginStatus: false, Error: "mentor not found" });
     }
-    const isPasswordValid = await bcrypt.compare(password, user.hashedPassword);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({ loginStatus: false, Error: "Incorrect password" });
-    }
     const isEmailValid = await User.findOne({ email });
 
     if (!isEmailValid) {
       return res.status(401).json({ loginStatus: false, Error: "Incorrect email" });
     }
+    const isPasswordValid = await bcrypt.compare(password, user.hashedPassword);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ loginStatus: false, Error: "Incorrect password" });
+    }
+    
     const token = jwt.sign(
       { role: "mentor", email: User.email, id: User._id }, ENV.JWT_SECRET,
       { expiresIn: "1d" }
