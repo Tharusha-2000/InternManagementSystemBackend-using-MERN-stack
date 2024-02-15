@@ -52,6 +52,6 @@ const verifyUser = (req, res, next) => {
     })
 
  
-  app.listen(8090, () => {
+  app.listen(8190, () => {
       console.log("Server is running")
     })

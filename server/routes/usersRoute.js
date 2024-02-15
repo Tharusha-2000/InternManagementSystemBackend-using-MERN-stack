@@ -8,6 +8,7 @@ const middleware = require('../middleware/auth.js');
 const Auth = middleware.Auth;
 const localVariables = middleware.localVariables;
 const otpGenerator = require('otp-generator');
+const nodemailer = require('nodemailer');
 
 /* POST: http://localhost:8090/api/users/login */
 router.post("/login", async (req, res) => {
@@ -128,20 +129,53 @@ router.post("/register",async (req, res, next) => {
  
 /** POST: http://localhost:8080/api/users/generateOTP */
 router.post("/generateOTP",localVariables,async (req,res)=>{
-  const { email } = req.body;
-
-
-  const existingUser = await User.findOne({ email });
-
-   if (!existingUser) {
-       return res.json({ message: "User not registered" });
-      }
-     req.app.locals.OTP = await otpGenerator.generate(6, {lowerCaseAlphabets: false,
-                                                           upperCaseAlphabets: false,
-                                                           specialChars: false})
+   
+    try{
+       const { email } = req.body;
+       const existingUser = await User.findOne({ email });
      
-     res.status(201).send({ code: req.app.locals.OTP })
+     if(!existingUser){
+            return res.json({ message: "User not registered" });
+      }
 
+      const otp = await otpGenerator.generate(6, {  lowerCaseAlphabets: false,
+                                                    upperCaseAlphabets: false,
+                                                    specialChars: false})
+     
+    
+    // Store OTP in req.app.locals for later verification if needed
+    req.app.locals.OTP = otp;
+    res.status(201).send({ code: otp})
+    // Create nodemailer transporter
+    
+    var transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: ENV.EMAIL, // generated ethereal user
+        pass: ENV.PASSWORD,
+        // "intern14"
+      },
+    });
+
+    var mailOptions = {
+      from: "tharushadinuth21@gmail.com",
+      to: "tharushadinuth21@gmail.com",
+      subject: "Password Reset",
+      text: 'that was easy',
+    };
+
+    transporter.sendMail(mailOptions, function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log("Email sent: " + info.response);
+      }
+    }); 
+
+    }catch(error){
+        console.error(error);
+        res.status(500).send({ error: "Internal Server Error" });
+    }
 });
 
 /** GET: http://localhost:8080/api/users/verifyOTP */
@@ -165,45 +199,35 @@ const createResetSession = (req,res)=>{
    return res.status(440).send({error : "Session expired!"})
 }
 
-router.put( "/resetPassword",async (req,res)=>{
+router.put("/resetPassword", async (req, res) => {
+  if(!req.app.locals.resetSession) return res.status(440).send({error : "Session expired!"});
   try {
-      
-    //  if(!req.app.locals.resetSession) return res.status(440).send({error : "Session expired!"});
-
-      const { email, password } = req.body;
-
-      try {
-         User.findOne({ email})
-               .then(user => {
-                     bcrypt.hash(password, 10)
-                        .then(hashedPassword => {
-                                User.updateOne({ email:user.email},
-                                { password: hashedPassword}, function(err, data){
-                                           if(err) throw err;
-                                           req.app.locals.resetSession = false; // reset session
-                                           return res.status(201).send({ msg : "Record Updated...!"})
-                                 });
-                      })
-                      .catch( e => {
-                          return res.status(500).send({
-                              error : "Enable to hashed password"
-                          })
-                      })
-              })
-              .catch(error => {
-                  return res.status(404).send({ error : "Username not Found"});
-              })
-
-      } catch (error) {
-          return res.status(500).send({ error })
+        // Check if the reset session is valid (if required)
+     const { email, password } = req.body;
+    try{
+      const user=await User.findOne({ email });
+    if(!user){
+        return res.status(404).send({ error: "User not found" });
       }
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(password, 10);
+        // Update the user's password in the database
+        await User.updateOne({ email:user.email },{ password:hashedPassword});
+        // Optionally reset session or other logic
+         req.app.locals.resetSession = false;
 
-    } catch(error){
-        return res.status(401).send({ error })
+      return res.status(201).send({ msg: "Password updated successfully" });
+
+    }catch(error) {
+          console.error(error);
+          return res.status(500).send({ error: "Internal Server Error" });
     }
+    }catch(error) {
+         console.error(error);
+         return res.status(401).send({ error });
+    }
+
 });
-
-
 
 
 

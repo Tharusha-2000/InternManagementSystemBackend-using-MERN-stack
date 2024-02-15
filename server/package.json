@@ -2,7 +2,6 @@
   "name": "server",
   "version": "1.0.0",
   "main": "server.js",
-  
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon server.js"
@@ -21,6 +20,7 @@
     "mongoose": "^8.1.1",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.9",
     "nodemon": "^3.0.3",
     "otp-generator": "^4.0.1",
     "path": "^0.12.7"
