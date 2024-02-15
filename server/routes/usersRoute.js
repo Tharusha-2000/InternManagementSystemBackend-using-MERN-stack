@@ -6,7 +6,8 @@ const jwt = require("jsonwebtoken");
 const ENV= require('../config.js');
 const middleware = require('../middleware/auth.js');
 const Auth = middleware.Auth;
-//const localVariables = middleware.localVariables;
+const localVariables = middleware.localVariables;
+const otpGenerator = require('otp-generator');
 
 /* POST: http://localhost:8090/api/users/login */
 router.post("/login", async (req, res) => {
@@ -103,20 +104,6 @@ router.put('/updateuser',Auth, async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 router.post("/register",async (req, res, next) => {
   
   try {
@@ -126,15 +113,10 @@ router.post("/register",async (req, res, next) => {
       return res.json({ message: "User already exists" });
        }
     const user = await User.create({ email, password, username,role, createdAt });
-    const token = jwt.sign({email: user.email,role: user.role},ENV.JWT_SECRET,{expiresIn: "1d"})
-
-    res.cookie("token", token, {
-      withCredentials: true,
-      httpOnly: false,
-      });
+  
     res
       .status(201)
-      .json({ message: "User signed in successfully", success: true, user,token });
+      .json({ message: "User signed in successfully", success: true, user });
       
     next();
   } catch (error) {
@@ -142,6 +124,100 @@ router.post("/register",async (req, res, next) => {
   }
 
    });
+
+ 
+/** POST: http://localhost:8080/api/users/generateOTP */
+router.post("/generateOTP",localVariables,async (req,res)=>{
+  const { email } = req.body;
+
+
+  const existingUser = await User.findOne({ email });
+
+   if (!existingUser) {
+       return res.json({ message: "User not registered" });
+      }
+     req.app.locals.OTP = await otpGenerator.generate(6, {lowerCaseAlphabets: false,
+                                                           upperCaseAlphabets: false,
+                                                           specialChars: false})
+     
+     res.status(201).send({ code: req.app.locals.OTP })
+
+});
+
+/** GET: http://localhost:8080/api/users/verifyOTP */
+router.get("/verifyOTP",async (req,res)=>{
+
+  const { code } = req.query;
+  if(parseInt(req.app.locals.OTP) === parseInt(code)){
+      req.app.locals.OTP = null; // reset the OTP value
+      req.app.locals.resetSession = true; // start session for reset password
+      return res.status(201).send({ msg: 'Verify Successsfully!'})
+  }
+  return res.status(400).send({ error: "Invalid OTP"});
+});
+
+// successfully redirect user when OTP is valid
+/** GET: http://localhost:8080/api/users/createResetSession */
+const createResetSession = (req,res)=>{
+   if(req.app.locals.resetSession){
+        return res.status(201).send({ flag : req.app.locals.resetSession})
+   }
+   return res.status(440).send({error : "Session expired!"})
+}
+
+router.put( "/resetPassword",async (req,res)=>{
+  try {
+      
+    //  if(!req.app.locals.resetSession) return res.status(440).send({error : "Session expired!"});
+
+      const { email, password } = req.body;
+
+      try {
+         User.findOne({ email})
+               .then(user => {
+                     bcrypt.hash(password, 10)
+                        .then(hashedPassword => {
+                                User.updateOne({ email:user.email},
+                                { password: hashedPassword}, function(err, data){
+                                           if(err) throw err;
+                                           req.app.locals.resetSession = false; // reset session
+                                           return res.status(201).send({ msg : "Record Updated...!"})
+                                 });
+                      })
+                      .catch( e => {
+                          return res.status(500).send({
+                              error : "Enable to hashed password"
+                          })
+                      })
+              })
+              .catch(error => {
+                  return res.status(404).send({ error : "Username not Found"});
+              })
+
+      } catch (error) {
+          return res.status(500).send({ error })
+      }
+
+    } catch(error){
+        return res.status(401).send({ error })
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -158,7 +234,7 @@ router.post("/login", async (req, res, next) => {
       return res.status(400).json({ message: 'All fields are required' });
     }
     const user = await User.findOne({ email });
-
+    
     if (!user) {
       return res.status(400).json({ message: 'Incorrect email' });
     }

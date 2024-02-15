@@ -24,9 +24,8 @@ const ENV = require('../config.js');
 
 
 } 
-  module.exports ={Auth};
 
-/*
+
 function localVariables(req, res, next){
     req.app.locals = {
         OTP : null,
@@ -34,6 +33,7 @@ function localVariables(req, res, next){
     }
     next();
 }
-*/
+
+module.exports ={Auth, localVariables};
 
 
