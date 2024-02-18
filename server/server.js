@@ -11,6 +11,9 @@ const internRoute = require("./routes/internRoute.js");
 const managerRoute = require("./routes/managerRoute.js");
 const mentorRoute = require("./routes/mentorRoute.js");
 const evaluvatorRoute = require("./routes/evaluvatorRoute.js");
+
+const body=require('body-parser');
+
 const app = express() 
 
 app.use(cors({
@@ -23,6 +26,7 @@ app.use(morgan('tiny'));
 app.use(express.json());
 app.use(cookieParser());
 
+
 app.use("/api/users", userRoute);
 app.use('/api/users', adminRoute);
 app.use("/api/users", internRoute);
@@ -30,7 +34,7 @@ app.use('/api/users', managerRoute);
 app.use('/api/users', mentorRoute); 
 app.use('/api/users', evaluvatorRoute);
 app.use(express.static('Public'))
-
+app.use(body.json());
 
 const verifyUser = (req, res, next) => {
   const token = req.cookies.token;
@@ -52,6 +56,6 @@ const verifyUser = (req, res, next) => {
     })
 
  
-  app.listen(8190, () => {
+  app.listen(8110, () => {
       console.log("Server is running")
     })

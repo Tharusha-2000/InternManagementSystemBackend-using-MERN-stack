@@ -8,7 +8,8 @@ const middleware = require('../middleware/auth.js');
 const Auth = middleware.Auth;
 const localVariables = middleware.localVariables;
 const otpGenerator = require('otp-generator');
-const nodemailer = require('nodemailer');
+var nodemailer = require('nodemailer');
+//const e = require("express");
 
 /* POST: http://localhost:8090/api/users/login */
 router.post("/login", async (req, res) => {
@@ -138,44 +139,45 @@ router.post("/generateOTP",localVariables,async (req,res)=>{
             return res.json({ message: "User not registered" });
       }
 
-      const otp = await otpGenerator.generate(6, {  lowerCaseAlphabets: false,
-                                                    upperCaseAlphabets: false,
-                                                    specialChars: false})
+      const otp = await otpGenerator.generate(6, { lowerCaseAlphabets: false,
+                                                   upperCaseAlphabets: false,
+                                                   specialChars: false})
      
-    
     // Store OTP in req.app.locals for later verification if needed
-    req.app.locals.OTP = otp;
-    res.status(201).send({ code: otp})
-    // Create nodemailer transporter
-    
+         req.app.locals.OTP = otp;
+      // Create nodemailer transporter
     var transporter = nodemailer.createTransport({
-      service: "gmail",
+      service: 'gmail',
       auth: {
-        user: ENV.EMAIL, // generated ethereal user
-        pass: ENV.PASSWORD,
-        // "intern14"
-      },
-    });
-
-    var mailOptions = {
-      from: "tharushadinuth21@gmail.com",
-      to: "tharushadinuth21@gmail.com",
-      subject: "Password Reset",
-      text: 'that was easy',
-    };
-
-    transporter.sendMail(mailOptions, function (error, info) {
-      if (error) {
-        console.log(error);
-      } else {
-        console.log("Email sent: " + info.response);
+        user: 'sanugidivi@gmail.com',
+        pass: 'SanugiDivi@2001'
       }
-    }); 
 
-    }catch(error){
-        console.error(error);
-        res.status(500).send({ error: "Internal Server Error" });
+    });
+    
+    var mailOptions = {
+      from: 'sanugidivi@gmail.com',
+      to: 'tharushadinuth21@gmail.com',
+      subject: 'Sending Email using Node.js',
+      text: 'That was easy!'
+    };
+    
+   transporter.sendMail(mailOptions, function(error, info){
+     
+      if(error){
+           console.log(error);
+        } else{
+          console.log('Email sent: ' + info.response);
+        }
+    });
+     
+    res.status(201).send({ code: otp})
+    
+    }catch(error){ 
+           console.error(error);
+           res.status(500).send({ error: "Internal Server Error" });
     }
+
 });
 
 /** GET: http://localhost:8080/api/users/verifyOTP */
