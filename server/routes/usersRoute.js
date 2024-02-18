@@ -144,34 +144,35 @@ router.post("/generateOTP",localVariables,async (req,res)=>{
                                                    specialChars: false})
      
     // Store OTP in req.app.locals for later verification if needed
-         req.app.locals.OTP = otp;
+        req.app.locals.OTP = otp;
       // Create nodemailer transporter
     var transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'sanugidivi@gmail.com',
-        pass: 'SanugiDivi@2001'
-      }
+        service: 'gmail',
+        auth: {
+          user: process.env.MY_EMAIL,
+          pass: process.env.MY_PASSWORD,
+        }
 
     });
     
     var mailOptions = {
-      from: 'sanugidivi@gmail.com',
-      to: 'tharushadinuth21@gmail.com',
-      subject: 'Sending Email using Node.js',
-      text: 'That was easy!'
+         from: 'sanugidivi@gmail.com',
+         to: 'tharushadinuth21@gmail.com',
+         subject: 'Sending Email using Node.js',
+         text: 'That was easy!'
     };
     
-   transporter.sendMail(mailOptions, function(error, info){
+     transporter.sendMail(mailOptions, function(error, info){
      
-      if(error){
-           console.log(error);
-        } else{
-          console.log('Email sent: ' + info.response);
-        }
+       if(error){
+             console.log(error);
+         } else{
+           console.log('Email sent: ' + info.response);
+         }
+    
     });
-     
-    res.status(201).send({ code: otp})
+       
+        res.status(201).send({ code: otp})
     
     }catch(error){ 
            console.error(error);
