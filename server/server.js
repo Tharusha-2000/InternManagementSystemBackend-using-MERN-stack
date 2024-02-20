@@ -35,7 +35,7 @@ app.use('/api/users', mentorRoute);
 app.use('/api/users', evaluvatorRoute);
 app.use(express.static('Public'))
 app.use(body.json());
-
+/*
 const verifyUser = (req, res, next) => {
   const token = req.cookies.token;
   if(token) {
@@ -54,8 +54,10 @@ const verifyUser = (req, res, next) => {
    app.get('/verify',verifyUser, (req, res)=> {
        return res.json({Status: true, role: req.role, id: req.id})
     })
+*/
+
 
  
-  app.listen(8110, () => {
+  app.listen(8080, () => {
       console.log("Server is running")
     })

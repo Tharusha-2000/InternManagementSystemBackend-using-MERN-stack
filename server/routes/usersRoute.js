@@ -115,10 +115,35 @@ router.post("/register",async (req, res, next) => {
       return res.json({ message: "User already exists" });
        }
     const user = await User.create({ email, password, username,role, createdAt });
-  
+     const data=
     res
       .status(201)
       .json({ message: "User signed in successfully", success: true, user });
+
+      var transporter = nodemailer.createTransport({
+
+        service: 'gmail',
+        port: 534,
+        auth: {
+          user: 'IMSystem99x@gmail.com',
+          pass: 'jqlwlkuvbtrmofmj'
+        }
+      });
+      
+      var mailOptions = {
+        from: 'IMSystem99x@gmail.com',
+        to: email,
+        subject: 'Sending Email using Node.js',
+        text: 'Your sucussefully register to the IMS YOUR email is : '+email+' and the password is '+ password+''
+      };
+      
+      transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+        }
+      });
       
     next();
   } catch (error) {
@@ -129,7 +154,7 @@ router.post("/register",async (req, res, next) => {
 
  
 /** POST: http://localhost:8080/api/users/generateOTP */
-router.post("/generateOTP",localVariables,async (req,res)=>{
+router.post("/generateOTP&sendmail",localVariables,async (req,res)=>{
    
     try{
        const { email } = req.body;
@@ -145,32 +170,30 @@ router.post("/generateOTP",localVariables,async (req,res)=>{
      
     // Store OTP in req.app.locals for later verification if needed
         req.app.locals.OTP = otp;
-      // Create nodemailer transporter
-    var transporter = nodemailer.createTransport({
-        service: 'gmail',
-        auth: {
-          user: process.env.MY_EMAIL,
-          pass: process.env.MY_PASSWORD,
-        }
+        var transporter = nodemailer.createTransport({
 
-    });
-    
-    var mailOptions = {
-         from: 'sanugidivi@gmail.com',
-         to: 'tharushadinuth21@gmail.com',
-         subject: 'Sending Email using Node.js',
-         text: 'That was easy!'
-    };
-    
-     transporter.sendMail(mailOptions, function(error, info){
-     
-       if(error){
-             console.log(error);
-         } else{
-           console.log('Email sent: ' + info.response);
-         }
-    
-    });
+          service: 'gmail',
+          port: 534,
+          auth: {
+            user: 'IMSystem99x@gmail.com',
+            pass: 'jqlwlkuvbtrmofmj'
+          }
+        });
+        
+        var mailOptions = {
+          from: 'IMSystem99x@gmail.com',
+          to: email,
+          subject: 'Sending Email using Node.js',
+          text: 'Your OTP is: '+otp+''
+        };
+        
+        transporter.sendMail(mailOptions, function(error, info){
+          if (error) {
+            console.log(error);
+          } else {
+            console.log('Email sent: ' + info.response);
+          }
+        });
        
         res.status(201).send({ code: otp})
     
@@ -232,25 +255,7 @@ router.put("/resetPassword", async (req, res) => {
 
 });
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+ 
 
 
 router.post("/login", async (req, res, next) => {
