@@ -21,22 +21,21 @@ router.post("/login", async (req, res) => {
     }
     const user = await User.findOne({ email });
 
-    if (!user) {
-      return res.status(401).json({ loginStatus: false, Error: "Incorrect email" });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.hashedPassword);
-
-    if (!isPasswordValid) {
-      return res.status(401).json({ loginStatus: false, Error: "Incorrect password" });
-    }
+     if (!user) {
+      return res.status(401).json({ loginStatus: false, msg: "Incorrect email" });
+     }
+    const u = await User.findOne({ password });
+     //const isPasswordValid = await bcrypt.compare(password,user.password);
+     if(!u) {
+      return res.status(401).json({ loginStatus: false, msg: "Incorrect password" });
+     }
    
     const token = jwt.sign(
-      {  email: user.email, id: user._id,role: user.role },ENV.JWT_SECRET,
-      { expiresIn: "1d" }
+      {  email: user.email,id: user._id,role: user.role },ENV.JWT_SECRET,
+      { expiresIn: "3d" }
     );
     
-    res.cookie('token', token);
+   // res.cookie('token', token);
     
    res.status(200).send({
       msg: "Login Successful...!",
@@ -61,8 +60,8 @@ try {
         const user = await User.findOne({ username });
 
     if (!user) return res.status(501).send({ error: "Couldn't Find the User" });
-      
-        const {password,hashedPassword,...rest} = Object.assign({}, user.toJSON());
+      //romove hash password
+        const {password,...rest} = Object.assign({}, user.toJSON());
         return res.status(201).send(rest);
    
     }catch(error){
@@ -225,40 +224,50 @@ const createResetSession = (req,res)=>{
    return res.status(440).send({error : "Session expired!"})
 }
 
-router.put("/resetPassword", async (req, res) => {
-  if(!req.app.locals.resetSession) return res.status(440).send({error : "Session expired!"});
+router.put("/resetPassword" ,async (req,res)=>{
   try {
-        // Check if the reset session is valid (if required)
-     const { email, password } = req.body;
-    try{
-      const user=await User.findOne({ email });
-    if(!user){
-        return res.status(404).send({ error: "User not found" });
+      
+     if(!req.app.locals.resetSession) return res.status(440).send({error : "Session expired!"});
+
+      const { email, password, confirmpassword } = req.body;
+
+      try {
+         const user=await User.findOne({email});
+          if(!user){
+             return res.json({ message: "User not registered" });
+          }
+
+
+          if(password !== confirmpassword){ 
+            return res.status(400).send({error : "Password and Confirm Password are not matching!"});
+          }
+               await User.updateOne(
+                     {
+                        email: email,
+                     },
+                     {
+                     $set: {
+                        password: password,
+                      },
+                     }
+                    
+                );
+                req.app.locals.resetSession = false; // reset session
+                return res.status(201).send({ msg : "Record Updated...!"})    
+
+      } catch (error) {
+          return res.status(500).send({ error })
       }
-        // Hash the new password
-        const hashedPassword = await bcrypt.hash(password, 10);
-        // Update the user's password in the database
-        await User.updateOne({ email:user.email },{ password:hashedPassword});
-        // Optionally reset session or other logic
-         req.app.locals.resetSession = false;
 
-      return res.status(201).send({ msg: "Password updated successfully" });
-
-    }catch(error) {
-          console.error(error);
-          return res.status(500).send({ error: "Internal Server Error" });
-    }
-    }catch(error) {
-         console.error(error);
-         return res.status(401).send({ error });
-    }
-
+  } catch (error) {
+      return res.status(401).send({ error: "Invalid Request"})
+  }
 });
 
  
 
 
-router.post("/login", async (req, res, next) => {
+router.post("/logins", async (req, res, next) => {
   try {
     const { email, password } = req.body;
 
