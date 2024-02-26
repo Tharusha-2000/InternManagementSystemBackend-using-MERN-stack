@@ -35,9 +35,9 @@ router.post("/login", async (req, res) => {
       { expiresIn: "3d" }
     );
     
-   // res.cookie('token', token);
+    //res.cookie('token', token);
     
-   res.status(200).send({
+    res.status(200).send({
       msg: "Login Successful...!",
       username: user.username,
       role: user.role,
@@ -155,51 +155,59 @@ router.post("/register",async (req, res, next) => {
 /** POST: http://localhost:8080/api/users/generateOTP */
 router.post("/generateOTP&sendmail",localVariables,async (req,res)=>{
    
-    try{
-       const { email } = req.body;
-       const existingUser = await User.findOne({ email });
+     try{
+        const { email } = req.body;
+        const existingUser = await User.findOne({ email });
      
-     if(!existingUser){
-            return res.json({ message: "User not registered" });
-      }
+        if(!existingUser){
+               return res.json({ msg: "User not registered" });
+         }
+        else{
+        const otp = await otpGenerator.generate(6, { lowerCaseAlphabets: false,
+                                                     upperCaseAlphabets: false,
+                                                     specialChars: false})
 
-      const otp = await otpGenerator.generate(6, { lowerCaseAlphabets: false,
-                                                   upperCaseAlphabets: false,
-                                                   specialChars: false})
+
+
+     // const token = jwt.sign(
+      //    {  email: user.email,id: user._id,role: user.role },ENV.JWT_SECRET,
+        //  { expiresIn: "180s" }
+     //     );                                            
      
-    // Store OTP in req.app.locals for later verification if needed
-        req.app.locals.OTP = otp;
-        var transporter = nodemailer.createTransport({
-
-          service: 'gmail',
-          port: 534,
-          auth: {
-            user: 'IMSystem99x@gmail.com',
-            pass: 'jqlwlkuvbtrmofmj'
-          }
-        });
+      // Store OTP in req.app.locals for later verification if needed
+          req.app.locals.OTP = otp;
+   
+          var transporter = nodemailer.createTransport({
+             service: 'gmail',
+             port: 534,
+              auth: {
+                user: 'IMSystem99x@gmail.com',
+                pass: 'jqlwlkuvbtrmofmj'
+              }
+            });
+          
+          var mailOptions = {
+             from: 'IMSystem99x@gmail.com',
+             to: email,
+             subject: 'Sending Email using Node.js',
+             text: 'Your OTP is: '+otp+''
         
-        var mailOptions = {
-          from: 'IMSystem99x@gmail.com',
-          to: email,
-          subject: 'Sending Email using Node.js',
-          text: 'Your OTP is: '+otp+''
-        };
-        
-        transporter.sendMail(mailOptions, function(error, info){
+          };
+ 
+       transporter.sendMail(mailOptions, function(error, info){
           if (error) {
             console.log(error);
           } else {
             console.log('Email sent: ' + info.response);
           }
-        });
-       
-        res.status(201).send({ code: otp})
-    
-    }catch(error){ 
+         });
+          res.status(201).send({ msg: "otp send!",code: otp})
+         
+        }
+     }catch(error){ 
            console.error(error);
            res.status(500).send({ error: "Internal Server Error" });
-    }
+       }
 
 });
 
@@ -207,12 +215,20 @@ router.post("/generateOTP&sendmail",localVariables,async (req,res)=>{
 router.get("/verifyOTP",async (req,res)=>{
 
   const { code } = req.query;
+
+  const otpTimeout= setTimeout(() => {
+    req.app.locals.OTP = null;
+  },  1 * 60 * 1000);
+  
+  
+
   if(parseInt(req.app.locals.OTP) === parseInt(code)){
+      clearTimeout(otpTimeout);
       req.app.locals.OTP = null; // reset the OTP value
       req.app.locals.resetSession = true; // start session for reset password
       return res.status(201).send({ msg: 'Verify Successsfully!'})
   }
-  return res.status(400).send({ error: "Invalid OTP"});
+  return res.status(400).send({ msg: "Invalid OTP"});
 });
 
 // successfully redirect user when OTP is valid
@@ -221,15 +237,15 @@ const createResetSession = (req,res)=>{
    if(req.app.locals.resetSession){
         return res.status(201).send({ flag : req.app.locals.resetSession})
    }
-   return res.status(440).send({error : "Session expired!"})
+   return res.status(440).send({msg : "Session expired!"})
 }
 
 router.put("/resetPassword" ,async (req,res)=>{
   try {
       
-     if(!req.app.locals.resetSession) return res.status(440).send({error : "Session expired!"});
+     if(!req.app.locals.resetSession) return res.status(440).send({msg : "Session expired!"});
 
-      const { email, password, confirmpassword } = req.body;
+      const { email, password } = req.body;
 
       try {
          const user=await User.findOne({email});
@@ -238,9 +254,7 @@ router.put("/resetPassword" ,async (req,res)=>{
           }
 
 
-          if(password !== confirmpassword){ 
-            return res.status(400).send({error : "Password and Confirm Password are not matching!"});
-          }
+         
                await User.updateOne(
                      {
                         email: email,

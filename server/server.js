@@ -17,7 +17,7 @@ const body=require('body-parser');
 const app = express() 
 
 app.use(cors({
-    origin: ["http://localhost:5175"],
+    origin: ["http://localhost:5176"],
     methods: ['GET', 'POST', 'PUT', "DELETE"],
     credentials: true
 }))
@@ -58,6 +58,6 @@ const verifyUser = (req, res, next) => {
 
 
  
-  app.listen(8090, () => {
+  app.listen(8110, () => {
       console.log("Server is running")
     })
