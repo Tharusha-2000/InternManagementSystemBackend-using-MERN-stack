@@ -1,3 +1,4 @@
+
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
@@ -22,9 +23,11 @@ app.use(cors({
     credentials: true
 }))
 
+
 app.use(morgan('tiny'));
 app.use(express.json());
 app.use(cookieParser());
+
 
 
 app.use("/api/users", userRoute);
@@ -61,3 +64,6 @@ const verifyUser = (req, res, next) => {
   app.listen(8201, () => {
       console.log("Server is running")
     })
+
+
+
