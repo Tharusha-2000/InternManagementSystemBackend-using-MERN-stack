@@ -108,16 +108,16 @@ router.put('/updateuser',Auth, async (req, res) => {
 router.post("/register",async (req, res, next) => {
   
   try {
-    const { email, password, username,role, createdAt } = req.body;
+    const { fname,lname,dob,role,gender,email,password} = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.json({ message: "User already exists" });
+      return res.json({ msg: "User already exists" });
        }
-    const user = await User.create({ email, password, username,role, createdAt });
+    const user = await User.create({ fname,lname,dob,role,gender,email,password });
      const data=
-    res
-      .status(201)
-      .json({ message: "User signed in successfully", success: true, user });
+      res
+        .status(201)
+        .json({ msg: "User signed in successfully", success: true, user });
 
       var transporter = nodemailer.createTransport({
 
