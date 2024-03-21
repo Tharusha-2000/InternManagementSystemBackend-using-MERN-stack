@@ -24,9 +24,9 @@ router.post("/login", async (req, res) => {
      if (!user) {
       return res.status(401).json({ loginStatus: false, msg: "Incorrect email" });
      }
-    const u = await User.findOne({ password });
-     //const isPasswordValid = await bcrypt.compare(password,user.password);
-     if(!u) {
+   
+     const isPasswordValid = await bcrypt.compare(password,user.password);
+     if(!isPasswordValid) {
       return res.status(401).json({ loginStatus: false, msg: "Incorrect password" });
      }
    
@@ -64,13 +64,7 @@ router.post("/generateOTP&sendmail",localVariables,async (req,res)=>{
      const otp = await otpGenerator.generate(6, { lowerCaseAlphabets: false,
                                                   upperCaseAlphabets: false,
                                                   specialChars: false})
-
-
-
-  // const token = jwt.sign(
-   //    {  email: user.email,id: user._id,role: user.role },ENV.JWT_SECRET,
-     //  { expiresIn: "180s" }
-  //     );                                            
+                                         
   
    // Store OTP in req.app.locals for later verification if needed
        req.app.locals.OTP = otp;
@@ -88,7 +82,12 @@ router.post("/generateOTP&sendmail",localVariables,async (req,res)=>{
           from: 'IMSystem99x@gmail.com',
           to: email,
           subject: 'Sending Email using Node.js',
-          text: 'Your OTP is: '+otp+''
+          html:`
+          <div style="width: 500px; padding: 20px; margin: 0 auto; border: 1px solid #ddd; border-radius: 10px; font-family: Arial, sans-serif; background-color: #f9f9f9;">
+                   <h1 style="color: blue; text-align: center;">Your OTP</h1>
+                   <p style="text-align: center; color: #333; font-size: 20px;">${otp}</p>
+          </div>
+          `
      
        };
 
@@ -143,23 +142,21 @@ router.put("/resetPassword" ,async (req,res)=>{
         
         if(!req.app.locals.resetSession) return res.status(440).send({msg : "Session expired!"});
 
-        const { email, password } = req.body;
+           const { email, password } = req.body;
 
         try {
             const user=await User.findOne({email});
             if(!user){
                 return res.json({ message: "User not registered" });
             }
-
-
-            
+            const hashedPassword = await bcrypt.hash(password, 12);
                   await User.updateOne(
                         {
                           email: email,
                         },
                         {
                         $set: {
-                          password: password,
+                          password: hashedPassword,
                         },
                         }
                       
@@ -175,10 +172,6 @@ router.put("/resetPassword" ,async (req,res)=>{
         return res.status(401).send({ error: "Invalid Request"})
         }
     });
-
-
-
-
 
 
 
@@ -219,32 +212,32 @@ router.put('/user/:id', async (req, res) => {
      const { role } = req.body;
      const { id } = req.params;
 
- if (!role) {
-     return res.status(400).send('Role is required');
-  }
-
- try {
-   const user = await User.findById(id);
-     if (!user) {
-        return res.status(404).send('User not found');
+      if (!role) {
+           return res.status(400).send('Role is required');
       }
 
-    await User.updateOne(
-      {
-         _id:id,
-      },
-       {
-       $set: {
-         role: role,
-        },
-      }
-    );
-    return res.status(201).send({ msg : "Record Updated...!"}) 
+  try {
+        const user = await User.findById(id);
+         if (!user) {
+            return res.status(404).send('User not found');
+          }
 
-  }  catch (err) {
-    console.error(err);
-    res.status(500).send('Server error');
-  }
+        await User.updateOne(
+          {
+              _id:id,
+          },
+          {
+             $set: {
+               role: role,
+           },
+          }
+        );
+      return res.status(201).send({ msg : "Record Updated...!"}) 
+
+    }  catch (err) {
+       console.error(err);
+       res.status(500).send('Server error');
+      }
 });
 
 router.post("/register",async (req, res, next) => {
@@ -284,8 +277,7 @@ router.post("/register",async (req, res, next) => {
                 <p><strong>Password:</strong> ${password}</p>
               </div>
               <p style="text-align: center; color: #333;">Your are welcome!</p>
-            </div>
-  `
+            </div> `
 
 
       };
@@ -349,7 +341,7 @@ router.put('/updateuser',Auth, async (req, res) => {
 });
 
 /* GET: http://localhost:8000/api/users/user/dinu */
-  router.get("/user/:username", async (req, res) => {
+router.get("/user/:username", async (req, res) => {
         const { username } = req.params;
   try {
       if (!username) return res.status(501).send({ error: "Invalid Username" });
