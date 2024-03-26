@@ -299,10 +299,6 @@ router.post("/register",async (req, res, next) => {
 
  
 
- 
-
-
-
 
 
 /** PUT: http://localhost:8000/api/updateuser 
