@@ -212,10 +212,7 @@ router.put('/user/:id', async (req, res) => {
      const { role } = req.body;
      const { id } = req.params;
 
-      if (!role) {
-           return res.status(400).send('Role is required');
-      }
-
+    
   try {
         const user = await User.findById(id);
          if (!user) {
@@ -357,7 +354,40 @@ router.get("/user/:username", async (req, res) => {
 
 /*......................................hansi.......................*/
 
+router.put('/secure',Auth, async (req, res) => {
+  try {
+    const { id } = req.user;
+    const { OldPassword, NewPassword } = req.body;
+    
+    const user = await User.findById(id);
+    console.log(id, user, OldPassword, NewPassword);
+    const validPassword = await bcrypt.compare(OldPassword, user.password);
+    if (!validPassword) {
+      return res.status(400).send({msg:'Invalid old password.'});
+    
+    }
+    const hashedPassword = await bcrypt.hash(NewPassword, 12);
+    user.password = hashedPassword;
 
+    await User.updateOne(
+          {
+            _id:id,
+          },
+          {
+           $set: {
+            password: hashedPassword,
+           },
+          }
+        
+    );
+   
+    return res.status(201).send({ msg : "Record Updated...!"})   
+    
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({msg:"Internal Server Error"});
+  }
+});
 
 /*......................................hansi.......................*/
 
