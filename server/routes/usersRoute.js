@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+
 const controller = require('../authcontrol/controller')
 const mailer = require('../authcontrol/mailer')
 // const User = require("../models/user");
@@ -89,12 +90,14 @@ module.exports = router;
 //       return res.status(404).send({ error: "User not found or no changes applied" });
 //     }
 
+
 //     return res.status(200).send({ msg: "Record Updated" });
 //   } catch (error) {
 //     console.error(error);
 //     return res.status(500).send({ error: "Internal Server Error" });
 //   }
 // });
+
 
 // /* GET: http://localhost:8000/api/users/user/dinu */
 // router.get("/user/:username", async (req, res) => {
@@ -115,45 +118,30 @@ module.exports = router;
 
 
 
-// /*......................................sanugi.......................*/
+/*......................................sanugi.......................*/
 
-// router.put('/secure',Auth, async (req, res) => {
-  
-//     const { id } = req.data;
-//     const { Oldpassword, Newpassword } = req.body;
-    
-//   try { 
-//     const user = await User.findById(id);
-//     console.log(user);
-//     const validPassword = await bcrypt.compare(Oldpassword, user.password);
-//     if (!validPassword) {
-//       return res.status(400).send({msg:'Invalid old password.'});
-    
-//     }
-//     const hashedPassword = await bcrypt.hash(Newpassword, 12);
-//     user.password = hashedPassword;
 
-//     await User.updateOne(
-//           {
-//             _id:id,
-//           },
-//           {
-//            $set: {
-//             password: hashedPassword,
-//            },
-//           }
-        
-//     );
-   
-//     return res.status(201).send({ msg : "Record Updated...!"})   
-    
-//   } catch (error) {
-//     console.error(error);
-//     res.status(500).send({msg:"Internal Server Error"});
-//   }
-// });
 
-// /*......................................sanugi.......................*/
 
-// module.exports = router;
 
+/*......................................hansi.......................*/
+
+/*......................................dilum.......................*/
+
+router.get("/interns", async (req, res) => {
+  try {
+    const interns = await User.find({ role: "intern" });
+    if (interns) {
+      res.status(200).json({ success: true, interns });
+    } else {
+      res.status(404).json({ success: false, message: "No interns found" });
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
+  }
+});
+
+/*......................................dilum.......................*/
+
+module.exports = router;
