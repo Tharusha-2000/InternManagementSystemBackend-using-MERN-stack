@@ -352,21 +352,22 @@ router.get("/user/:username", async (req, res) => {
 
 
 
-/*......................................hansi.......................*/
+/*......................................sanugi.......................*/
 
 router.put('/secure',Auth, async (req, res) => {
-  try {
-    const { id } = req.user;
-    const { OldPassword, NewPassword } = req.body;
+  
+    const { id } = req.data;
+    const { Oldpassword, Newpassword } = req.body;
     
+  try { 
     const user = await User.findById(id);
-    console.log(id, user, OldPassword, NewPassword);
-    const validPassword = await bcrypt.compare(OldPassword, user.password);
+    console.log(user);
+    const validPassword = await bcrypt.compare(Oldpassword, user.password);
     if (!validPassword) {
       return res.status(400).send({msg:'Invalid old password.'});
     
     }
-    const hashedPassword = await bcrypt.hash(NewPassword, 12);
+    const hashedPassword = await bcrypt.hash(Newpassword, 12);
     user.password = hashedPassword;
 
     await User.updateOne(
@@ -389,7 +390,7 @@ router.put('/secure',Auth, async (req, res) => {
   }
 });
 
-/*......................................hansi.......................*/
+/*......................................sanugi.......................*/
 
 module.exports = router;
 
