@@ -12,6 +12,7 @@ const ENV = require('../config.js');
        
         // retrive the user details fo the logged in user
         const decodedToken = await jwt.verify(token, ENV.JWT_SECRET);
+
         req.data = decodedToken;
         console.log("decodedToken");
         console.log("hi");
