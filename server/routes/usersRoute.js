@@ -128,6 +128,7 @@ module.exports = router;
 
 /*......................................dilum.......................*/
 
+
 router.get("/interns", async (req, res) => {
   try {
     const interns = await User.find({ role: "intern" });

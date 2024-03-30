@@ -15,7 +15,6 @@ const ENV = require('../config.js');
 
         req.data = decodedToken;
         console.log("decodedToken");
-        console.log("hi");
         console.log(decodedToken);    
        
 
