@@ -172,18 +172,19 @@ exports.deleteUser=async(req, res)=> {
 exports.changeRole= async (req, res) => {
      const { role } = req.body;
      const { id } = req.params;
-
-    
-  try { 
+ try { 
     if (req.data.role !== 'admin') {
-        return res.status(403).json({ msg: "You do not have permission to access this function" });
+        return res.status(403).send({ msg: "You do not have permission to access this function" });
     }
-        const user = await User.findById(id);
-         if (!user) {
-            return res.status(404).send('User not found');
-          }
-
-        await User.updateOne(
+   
+      // console.log(req.data.role);
+       //console.log(req.data.id);
+        //console.log(id);
+    const user = await User.findById(id);
+       if (!user) {
+         return res.status(404).send('User not found');
+         }
+       await User.updateOne(
           {
               _id:id,
           },
@@ -193,9 +194,23 @@ exports.changeRole= async (req, res) => {
            },
           }
         );
-      return res.status(201).send({ msg : "Record Updated...!"}) 
+        
+        if(req.data.id === id){
+            if(req.data.role === user.role){
+                return res.status(403).send({ msg: "You do not have permission to access this function" });   
+               
+            
+            }
 
-    }  catch (err) {
+
+            if(req.data.role !== user.role){
+               return res.status(403).send({ msg: "You do not have permission to access this function" });   
+              }
+        } 
+    
+      return res.status(201).send({ msg : "Record Updated...!"}) 
+    
+      }  catch (err) {
        console.error(err);
        res.status(500).send('Server error');
       }
