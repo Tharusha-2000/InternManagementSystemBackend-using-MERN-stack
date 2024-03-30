@@ -28,6 +28,19 @@ router.post("/register",middleware.Auth,controller.register,mailer.sendWelcomeEm
 /*..........................................secure................................................. */
 router.put('/secure',middleware.Auth,controller.secure);
 
+
+
+
+
+
+
+
+
+
+/*..........................................evaluvationpart................................................. */
+router.get("/interns",controller.getInterns);
+
+
 module.exports = router;
 
 
@@ -129,19 +142,7 @@ module.exports = router;
 /*......................................dilum.......................*/
 
 
-router.get("/interns", async (req, res) => {
-  try {
-    const interns = await User.find({ role: "intern" });
-    if (interns) {
-      res.status(200).json({ success: true, interns });
-    } else {
-      res.status(404).json({ success: false, message: "No interns found" });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
-  }
-});
+
 
 /*......................................dilum.......................*/
 

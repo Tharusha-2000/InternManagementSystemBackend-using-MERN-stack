@@ -281,5 +281,27 @@ exports.secure = async (req, res) => {
 };
 
 /*......................................sanugi.......................*/
+/*......................................dilum.......................*/
+
+exports.getInterns= async (req, res) => {
 
 
+    try {
+        if (req.data.role !== "admin") {
+            return res
+              .status(403)
+              .json({ msg: "You do not have permission to access this function" });
+          }
+      const interns = await User.find({ role: "intern" });
+      if (interns) {
+        res.status(200).json({ success: true, interns });
+      } else {
+        res.status(404).json({ success: false, message: "No interns found" });
+      }
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ success: false, message: "Internal Server Error" });
+    }
+  };
+
+  /*......................................dilum.......................*/
