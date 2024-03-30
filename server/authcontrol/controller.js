@@ -161,7 +161,7 @@ exports.deleteUser=async(req, res)=> {
       let id = req.params.id;
       const user= await User.findByIdAndDelete(id);
           res.status(200).send( {msg: "User deleted"});
-
+      
       }catch(error){
         console.error(error);
         res.status(500).send('Internal Server Error');
@@ -195,15 +195,8 @@ exports.changeRole= async (req, res) => {
           }
         );
         
-        if(req.data.id === id){
-            if(req.data.role === user.role){
-                return res.status(403).send({ msg: "You do not have permission to access this function" });   
-               
-            
-            }
-
-
-            if(req.data.role !== user.role){
+        if(req.data.id === id ){
+            if(role !== "admin"){
                return res.status(403).send({ msg: "You do not have permission to access this function" });   
               }
         } 
