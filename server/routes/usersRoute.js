@@ -10,6 +10,11 @@ const localVariables = middleware.localVariables;
 const otpGenerator = require("otp-generator");
 var nodemailer = require("nodemailer");
 
+/*-----------------------------Dilum-----------------------------*/
+const {getInterns} = require('../controllers/userController.js');
+router.get('/interns', getInterns);
+/*-----------------------------Dilum-----------------------------*/
+
 /*..............................login page.............................................*/
 /* POST: http://localhost:8000/api/users/login */
 router.post("/login", async (req, res) => {
@@ -374,19 +379,9 @@ router.put("/secure", Auth, async (req, res) => {
 
 /*......................................dilum.......................*/
 
-router.get("/interns", async (req, res) => {
-  try {
-    const interns = await User.find({ role: "intern" });
-    if (interns) {
-      res.status(200).json({ success: true, interns });
-    } else {
-      res.status(404).json({ success: false, message: "No interns found" });
-    }
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
-  }
-});
+
+
+
 
 /*......................................dilum.......................*/
 
