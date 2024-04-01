@@ -10,9 +10,7 @@ const ENV= require('./config.js');
 
 
 const userRoute = require("./routes/usersRoute.js");
-const adminRoute = require("./routes/adminRoute.js");
-const internRoute = require("./routes/internRoute.js");
-const evaluvatorRoute = require("./routes/evaluvatorRoute.js");
+
 
 const body=require('body-parser');
 
@@ -32,9 +30,6 @@ app.use(cookieParser());
 
 
 app.use("/api/users", userRoute);
-app.use('/api/users', adminRoute);
-app.use("/api/users", internRoute);
-app.use('/api/users', evaluvatorRoute);
 app.use(express.static('Public'))
 app.use(body.json());
 /*
@@ -62,6 +57,7 @@ const verifyUser = (req, res, next) => {
  
   app.listen(8001, () => {
       console.log("Server is running")
+      
     })
 
 

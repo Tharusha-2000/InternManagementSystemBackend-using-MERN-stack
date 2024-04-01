@@ -1,6 +1,7 @@
+const ENV= require('../config.js');
 const  mongoose  = require("mongoose");
 require("dotenv").config();
-var mongoURL = 'mongodb+srv://IMS:IMS123@imsdb.af3d7jt.mongodb.net/'
+var mongoURL = ENV.DBUrl;
 
 mongoose.connect(process.env.MONGODB_URI || mongoURL)
     .then(() => {
