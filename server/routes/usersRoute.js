@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
+
 const controller = require('../authcontrol/controller')
 const mailer = require('../authcontrol/mailer')
 // const User = require("../models/user");
@@ -131,6 +132,8 @@ module.exports = router;
 
 
 
+
+
 /*......................................sanugi.......................*/
 
 
@@ -145,5 +148,3 @@ module.exports = router;
 
 
 /*......................................dilum.......................*/
-
-module.exports = router;
