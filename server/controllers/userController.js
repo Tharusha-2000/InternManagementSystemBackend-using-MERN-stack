@@ -1,4 +1,4 @@
-const User=require('../models/user.js');
+/*const User=require('../models/user.js');
 
 const getInterns = async (req, res) => {
     try {
@@ -17,3 +17,4 @@ const getInterns = async (req, res) => {
     module.exports = {
         getInterns
     }
+    */

@@ -38,8 +38,13 @@ router.put('/secure',middleware.Auth,controller.secure);
 
 
 
-/*..........................................evaluvationpart................................................. */
-router.get("/interns",controller.getInterns);
+/*..........................................evaluvationpart - dilum................................................. */
+//router.get("/interns",controller.getInterns);
+const {getInterns} = require('../authcontrol/controller');
+router.get('/interns', getInterns);
+
+
+
 
 
 module.exports = router;
@@ -135,7 +140,7 @@ module.exports = router;
 
 
 /*......................................sanugi.......................*/
-
+/*
 router.put("/secure", Auth, async (req, res) => {
   const { id } = req.data;
   const { Oldpassword, Newpassword } = req.body;
@@ -167,7 +172,7 @@ router.put("/secure", Auth, async (req, res) => {
     res.status(500).send({ msg: "Internal Server Error" });
   }
 });
-
+*/
 /*......................................hansi.......................*/
 
 
