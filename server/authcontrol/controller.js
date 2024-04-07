@@ -129,7 +129,7 @@ exports.resetPassword = async (req, res) => {
 
 /*.............................registation add user table............................*/
 
-exports.getUser = async (req, res) => {
+exports.getUsers = async (req, res) => {
   try {
     if (req.data.role !== "admin") {
       return res
@@ -224,7 +224,7 @@ exports.register = async (req, res, next) => {
         .json({ msg: "You do not have permission to access this function" });
     }
 
-    const { fname, lname, dob, role, gender, email, password } = req.body;
+    const { fname, lname, dob, role, gender, email, password,jobtitle,employmentType,department} = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.json({ msg: "User already exists" });
@@ -237,6 +237,9 @@ exports.register = async (req, res, next) => {
       gender,
       email,
       password,
+      jobtitle,
+      employmentType,
+      department,
     });
 
     res.locals.userData = { email, password };
@@ -245,6 +248,43 @@ exports.register = async (req, res, next) => {
     console.error(error);
   }
 };
+
+const multer = require("multer");
+const upload = multer({ dest: "uploads/" });
+/*..............................create user profile.............................. */
+//exports.uploadImage = async (req, res) => {
+//     const { base64} = req.body;
+//     const { id } = req.data;
+//     try {
+//       const user = await User.findById(id);
+//       if (!user) {
+//         return res.status(404).json({ msg: "User not found" });
+//       }
+//       user.image = base64;
+//       await user.save();
+//       res.json({ msg: "Image uploaded successfully" });
+//     } catch (error) {
+//       res.status(500).json({ msg: "Internal Server Error" });
+//     }
+//   };
+const fs = require('fs');
+const path = require('path');
+
+exports.getUser = async (req, res) => {
+     const { id } = req.data;
+   try {
+      const user = await User.findById(id);
+      const imagePath = path.join(__dirname, '..', user.image);
+
+        res.status(201).json({ success: true,user,imagePath });
+        
+
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Internal Server Error");
+    }
+  };
 
 /*......................................sanugi.......................*/
 

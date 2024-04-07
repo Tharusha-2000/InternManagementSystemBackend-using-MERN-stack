@@ -29,6 +29,24 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
+
+    jobtitle:{
+      type: String,
+      required:false,
+    },
+    employmentType:{
+      type: String,
+      required:false,
+    },
+    department:{
+      type: String,
+      required:false,
+    },
+    
+
+    image: {
+      type: String,
+    },
     
    },
   );
