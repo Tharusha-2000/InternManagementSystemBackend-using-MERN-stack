@@ -8,6 +8,10 @@ const dbconfig = require("./utils/db.js");
 const ENV= require('./config.js');
 
 
+const Evaluationformdetails = require('./models/Evaluationformdetails');
+
+
+
 
 const userRoute = require("./routes/usersRoute.js");
 
@@ -52,6 +56,38 @@ const verifyUser = (req, res, next) => {
        return res.json({Status: true, role: req.role, id: req.id})
     })
 */
+
+
+//--------------------------------dilum code for get evaluationlist -----------------
+
+/*app.post('/evaluationformdetails/all', async (req, res) => {
+    try {
+        // Import the Intern model
+        const Intern = require('./models/Intern');
+
+        // Find all interns in the Intern collection
+        const interns = await Intern.find();
+
+        // Create a new document in the Evaluationformdetails collection for each intern
+        const evaluationFormDetails = interns.map(intern => ({
+            user: intern._id,
+            eformstates: 'not created' // default value
+        }));
+
+        // Save all the documents to the database
+        const savedEvaluationFormDetails = await Evaluationformdetails.insertMany(evaluationFormDetails);
+
+        // Send the saved documents in the response
+        res.json(savedEvaluationFormDetails);
+    } catch (err) {
+        // Send an error response if something goes wrong
+        res.status(500).json({ error: err.message });
+    }
+});
+*/
+
+
+
 
 
  

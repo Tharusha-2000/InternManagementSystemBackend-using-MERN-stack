@@ -1,4 +1,6 @@
-const User = require("../models/user");
+const User = require("../models/user.js");
+const Intern = require("../models/intern");
+const EvaluationFormDetails = require('../models/Evaluationformdetails');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const ENV = require("../config.js");
@@ -283,18 +285,28 @@ exports.secure = async (req, res) => {
 /*......................................sanugi.......................*/
 /*......................................dilum.......................*/
 
-exports.getInterns = async (req, res) => {
+exports.getInterns =  async (req, res) => {
   try {
-      const interns = await User.find({ role: "intern" });
-      if (interns) {
-        res.status(200).json({ success: true, interns });
-      } else {
-        res.status(404).json({ success: false, message: "No interns found" });
-      }
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, message: 'Internal Server Error' });
-    }
-};
+      const users = await User.find().lean();
+
+      const promises = users.map(async user => {
+          const intern = await Intern.findOne({ user: user._id }).lean();
+          const evaluationFormDetails = await EvaluationFormDetails.findOne({ user: user._id }).lean();
+
+          return {
+              name: user.fname + ' ' + user.lname,
+              mentor: intern ? intern.mentor : null,
+              eformStatus: evaluationFormDetails ? evaluationFormDetails.eformstates : null
+          };
+      });
+
+      const userDetails = await Promise.all(promises);
+
+      res.json(userDetails);
+  } catch (err) {
+      res.status(500).json({ error: err.message });
+  }
+}
+
 
   /*......................................dilum.......................*/
