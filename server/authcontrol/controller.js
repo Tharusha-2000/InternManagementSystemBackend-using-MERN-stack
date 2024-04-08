@@ -276,19 +276,33 @@ exports.getUser = async (req, res) => {
      const { id } = req.data;
    try {
       const user = await User.findById(id);
-
-     
-
-        res.status(201).json({ success: true,user });
-        
-
-
-    } catch (error) {
+      res.status(201).json({ success: true,user });
+      } catch (error) {
       console.error(error);
       res.status(500).send("Internal Server Error");
     }
   };
 
+
+exports.updateuser=async (req, res) => {
+    const { id } = req.data;
+    try {
+       if (!id) {
+        return res.status(401).send({ error: "User ID not provided" });
+      }
+      const body = req.body;
+      // Update the data
+      const result = await User.updateOne({ _id: id}, body);
+  
+      if (result.nModified === 0) {
+        return res.status(404).send({ error: "User not found or no changes applied" });
+      }
+      return res.status(200).send({ msg: "Record Updated" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).send({ error: "Internal Server Error" });
+    }
+  };
 /*......................................sanugi.......................*/
 
 exports.secure = async (req, res) => {

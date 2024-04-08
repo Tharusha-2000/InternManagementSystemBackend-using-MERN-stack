@@ -30,7 +30,15 @@ router.post("/register",middleware.Auth,controller.register,mailer.sendWelcomeEm
 router.put('/secure',middleware.Auth,controller.secure);
 
 
+
+
+
+
+/*..........................................profile create................................................. */
+
 router.get('/user',middleware.Auth,controller.getUser);
+router.put("/updateuser",middleware.Auth,controller.updateuser);
+
 //router.put('/uploadImage',middleware.Auth,controller.uploadImage);
 
 const multer = require("multer");
@@ -63,7 +71,7 @@ router.post('/uploadImage', middleware.Auth,upload.single('image'), async (req, 
       }
 
 });
-
+/*..........................................create intren profile................................................ */
 
 
 
@@ -105,42 +113,6 @@ module.exports = router;
 
 
 
-// /** PUT: http://localhost:8000/api/updateuser 
-// * @param: {
-// "header" : "<token>"
-// }
-// body: {
-//   firstName: '',
-//   address : '',
-//   profile : ''
-// }
-// */
-// router.put('/updateuser',Auth, async (req, res) => {
-//   //const id = req.query.id;
-//   const { id } = req.user;
-//   try {
-    
-//     if (!id) {
-//       return res.status(401).send({ error: "User ID not provided" });
-//     }
-
-//     const body = req.body;
-
-//     // Update the data
-//     const result = await User.updateOne({ _id: id}, body);
-
-//     if (result.nModified === 0) {
-//       return res.status(404).send({ error: "User not found or no changes applied" });
-//     }
-
-
-//     return res.status(200).send({ msg: "Record Updated" });
-//   } catch (error) {
-//     console.error(error);
-//     return res.status(500).send({ error: "Internal Server Error" });
-//   }
-// });
-
 
 // /* GET: http://localhost:8000/api/users/user/dinu */
 // router.get("/user/:username", async (req, res) => {
@@ -178,4 +150,4 @@ module.exports = router;
 
 /*......................................dilum.......................*/
 
-module.exports = router;
+
