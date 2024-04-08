@@ -15,21 +15,22 @@ const userSchema = mongoose.Schema(
       type: String,
       required: true,
     },
-    role:{
+     role:{
       type: String,
       required: true,
     },
-    email: {
+     email: {
       type: String,
       required: true,
-      
     },
-
+    gender: {
+      type: String,
+      required: true,
+    },
     password: {
       type: String,
       required: true,
     },
-
     jobtitle:{
       type: String,
       required:false,
@@ -42,8 +43,6 @@ const userSchema = mongoose.Schema(
       type: String,
       required:false,
     },
-    
-
     image: {
       type: String,
     },

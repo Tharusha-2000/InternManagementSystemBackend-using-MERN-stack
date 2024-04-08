@@ -183,7 +183,7 @@ exports.changeRole = async (req, res) => {
     }
 
     // console.log(req.data.role);
-    //console.log(req.data.id);
+   
     //console.log(id);
     const user = await User.findById(id);
     //not necessary
@@ -241,6 +241,8 @@ exports.register = async (req, res, next) => {
       employmentType,
       department,
     });
+    //console.log(req.data.gender);
+    console.log(req.data); 
 
     res.locals.userData = { email, password };
     next();
@@ -250,7 +252,7 @@ exports.register = async (req, res, next) => {
 };
 
 const multer = require("multer");
-const upload = multer({ dest: "uploads/" });
+//const upload = multer({ dest: "uploads/" });
 /*..............................create user profile.............................. */
 //exports.uploadImage = async (req, res) => {
 //     const { base64} = req.body;
@@ -274,9 +276,10 @@ exports.getUser = async (req, res) => {
      const { id } = req.data;
    try {
       const user = await User.findById(id);
-      const imagePath = path.join(__dirname, '..', user.image);
 
-        res.status(201).json({ success: true,user,imagePath });
+     
+
+        res.status(201).json({ success: true,user });
         
 
 
@@ -321,6 +324,7 @@ exports.secure = async (req, res) => {
 };
 
 /*......................................sanugi.......................*/
+
 /*......................................dilum.......................*/
 
 exports.getInterns= async (req, res) => {
