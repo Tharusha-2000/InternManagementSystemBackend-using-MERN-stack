@@ -154,6 +154,7 @@ exports.deleteUser = async (req, res) => {
     }
     let id = req.params.id;
     const user = await User.findByIdAndDelete(id);
+        
     //not nessary
     if (req.data.id === id) {
       return res
@@ -303,6 +304,76 @@ exports.updateuser=async (req, res) => {
       return res.status(500).send({ error: "Internal Server Error" });
     }
   };
+
+  /*......................................intern table create.......................*/
+// Read Intern Users
+exports.getInternList = async (req, res) => {
+  try {
+    if (req.data.role === "intern") {
+      return res
+        .status(403)
+        .json({ msg: "You do not have permission to access this function" });
+
+    }
+    // Fetch all users from the database
+    const interns = await User.find({ role: 'intern' });
+                   res.status(201).json({ success: true, interns });
+  }catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Get Intern by ID
+exports.getIntern= async (req, res) => {
+  try {
+    const intern = await User.findById(req.params.id);
+    if (req.data.role === "intern") {
+      return res
+        .status(403)
+        .json({ msg: "You do not have permission to access this function" });
+
+    }
+    if (!intern) {
+      return res.status(404).json({ message: 'Intern not found' });
+    }
+   
+      res.status(201).json({ success: true, intern});
+    
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// Update Intern User
+exports.updatedIntern= async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (req.data.role !== "admin") {
+      return res
+        .status(403)
+        .json({ msg: "You do not have permission to access this function" });
+    }
+    const updatedIntern = await User.findByIdAndUpdate(id, req.body, { new: true });
+    if (!updatedIntern) {
+      return res.status(404).json({ message: 'Intern user not found' });
+    }
+    res.json({msg:"update successfully", updatedIntern});
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+ /*......................................intern profile create.......................*/
+
+
+
+
+
+
+
+
+
+
 /*......................................sanugi.......................*/
 
 exports.secure = async (req, res) => {
@@ -340,26 +411,5 @@ exports.secure = async (req, res) => {
 /*......................................sanugi.......................*/
 
 /*......................................dilum.......................*/
-
-exports.getInterns= async (req, res) => {
-
-
-    try {
-        if (req.data.role !== "admin") {
-            return res
-              .status(403)
-              .json({ msg: "You do not have permission to access this function" });
-          }
-      const interns = await User.find({ role: "intern" });
-      if (interns) {
-        res.status(200).json({ success: true, interns });
-      } else {
-        res.status(404).json({ success: false, message: "No interns found" });
-      }
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ success: false, message: "Internal Server Error" });
-    }
-  };
 
   /*......................................dilum.......................*/

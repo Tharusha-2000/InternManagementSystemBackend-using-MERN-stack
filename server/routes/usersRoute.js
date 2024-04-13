@@ -5,6 +5,7 @@ const router = express.Router();
 const controller = require('../authcontrol/controller')
 const mailer = require('../authcontrol/mailer')
 const User = require("../models/user");
+const Intern = require("../models/intern");
 // const bcrypt = require("bcryptjs");
 // const jwt = require("jsonwebtoken");
 // const ENV= require('../config.js');
@@ -73,10 +74,13 @@ router.post('/uploadImage', middleware.Auth,upload.single('image'), async (req, 
 });
 /*..........................................create intren profile................................................ */
 
+router.get('/interns', middleware.Auth,controller.getInternList);
+router.get('/interns/:id', middleware.Auth,controller.getIntern);
+router.put('/interns/:id',middleware.Auth,controller.updatedIntern);
 
 
 /*..........................................evaluvationpart................................................. */
-router.get("/interns",controller.getInterns);
+
 
 
 module.exports = router;
@@ -85,17 +89,6 @@ module.exports = router;
 
 
 
-
-
-
-// // successfully redirect user when OTP is valid
-// /** GET: http://localhost:8000/api/users/createResetSession */
-// const createResetSession = (req,res)=>{
-//       if(req.app.locals.resetSession){
-//           return res.status(201).send({ flag : req.app.locals.resetSession})
-//       }
-//       return res.status(440).send({msg : "Session expired!"})
-//       }
 
 
 

@@ -10,7 +10,7 @@ const ENV= require('./config.js');
 
 
 const userRoute = require("./routes/usersRoute.js");
-
+const internRoute = require("./routes/internRoute.js");
 
 const body=require('body-parser');
 
@@ -30,6 +30,7 @@ app.use(cookieParser());
 
 
 app.use("/api/users", userRoute);
+app.use("/api/users", internRoute);
 app.use(express.static('Public'))
 app.use(body.json());
 /*
