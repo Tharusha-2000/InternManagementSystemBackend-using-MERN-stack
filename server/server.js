@@ -14,7 +14,7 @@ const Evaluationformdetails = require('./models/Evaluationformdetails');
 
 
 const userRoute = require("./routes/usersRoute.js");
-
+const internRoute = require("./routes/internRoute.js");
 
 const body=require('body-parser');
 
@@ -34,6 +34,7 @@ app.use(cookieParser());
 
 
 app.use("/api/users", userRoute);
+app.use("/api/users", internRoute);
 app.use(express.static('Public'))
 app.use(body.json());
 /*
@@ -91,7 +92,7 @@ const verifyUser = (req, res, next) => {
 
 
  
-  app.listen(8001, () => {
+  app.listen(8000, () => {
       console.log("Server is running")
       
     })
