@@ -1,4 +1,6 @@
-const User = require("../models/user");
+const User = require("../models/user.js");
+const Intern = require("../models/intern");
+const EvaluationFormDetails = require('../models/Evaluationformdetails');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const ENV = require("../config.js");
@@ -434,6 +436,8 @@ exports.secure = async (req, res) => {
 
 /*......................................sanugi.......................*/
 
+
 /*......................................dilum.......................*/
+
 
   /*......................................dilum.......................*/

@@ -54,6 +54,7 @@ const storage = multer.diskStorage({
   }
 })
 
+
 const upload = multer({ storage: storage })
 
 router.post('/uploadImage', middleware.Auth,upload.single('image'), async (req, res) => {
@@ -126,9 +127,6 @@ module.exports = router;
 
 
 
-
-
-/*......................................sanugi.......................*/
 
 
 /*......................................hansi.......................*/
