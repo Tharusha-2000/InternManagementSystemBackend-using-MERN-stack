@@ -81,8 +81,8 @@ const userSchema = mongoose.Schema(
     type: String,
     //required: true
   },
-  accomplishments: {
-    type: String,
+  phonenumber: {
+    type: Number,
    // required: true
   },
   Bio:{

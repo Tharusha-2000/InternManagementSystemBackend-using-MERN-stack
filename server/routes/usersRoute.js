@@ -77,7 +77,7 @@ router.post('/uploadImage', middleware.Auth,upload.single('image'), async (req, 
 router.get('/interns', middleware.Auth,controller.getInternList);
 router.get('/interns/:id', middleware.Auth,controller.getIntern);
 router.put('/interns/:id',middleware.Auth,controller.updatedIntern);
-
+router.put('/updateinterns',middleware.Auth,controller.updateinternprofile);
 
 /*..........................................evaluvationpart................................................. */
 

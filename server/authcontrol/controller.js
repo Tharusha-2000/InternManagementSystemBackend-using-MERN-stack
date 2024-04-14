@@ -288,6 +288,9 @@ exports.getUser = async (req, res) => {
 exports.updateuser=async (req, res) => {
     const { id } = req.data;
     try {
+      if(req.data.role === "intern"){
+          return res.status(403).send({msg: "You do not have permission to access this function"});
+      }
        if (!id) {
         return res.status(401).send({ error: "User ID not provided" });
       }
@@ -365,8 +368,29 @@ exports.updatedIntern= async (req, res) => {
 
  /*......................................intern profile create.......................*/
 
+ exports.updateinternprofile=async (req, res) => {
+  const { id } = req.data;
+  
+  try {
+     if(req.data.role !== "intern"){
+        return res.status(403).send({msg: "You do not have permission to access this function"});
+     }
+     if (!id) {
+      return res.status(401).send({ error: "User ID not provided" });
+    }
+    const body = req.body;
+    // Update the data
+    const result = await User.updateOne({ _id: id}, body);
 
-
+    if (result.nModified === 0) {
+      return res.status(404).send({ error: "User not found or no changes applied" });
+    }
+    return res.status(200).send({ msg: "Record Updated" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({ error: "Internal Server Error" });
+  }
+};
 
 
 
