@@ -93,30 +93,11 @@ router.put('/updateinterns',middleware.Auth,controller.updateinternprofile);
 router.get('/task',middleware.Auth,controller.getTask);
 router.post('/task',middleware.Auth,controller.createTask);
 router.delete('/task/:id',middleware.Auth,controller.deleteTask);
-
-
-router.put('/task/:id',middleware.Auth, async (req, res) => {
-  try {
-    const { id } = req.params;
-    if (req.data.role !== "intern") {
-      return res
-        .status(403)
-        .json({ msg: "You do not have permission to access this function" });
-    }
-    const updatedtask = await Task.findByIdAndUpdate(id, req.body, { new: true });
-    if (!updatedtask) {
-      return res.status(404).json({ message: 'task not found' });
-    }
-    res.json({msg:"update successfully", updatedtask});
-    console.log(updatedtask);
-    console.log(updatedtask.isComplete);
+router.put('/task/:id',middleware.Auth,controller.updateTask);
 
 
 
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
+
 
 
 

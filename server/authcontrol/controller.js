@@ -455,6 +455,29 @@ exports.deleteTask= async (req, res) => {
   }
 };
 
+
+exports.updateTask= async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (req.data.role !== "intern") {
+      return res
+        .status(403)
+        .json({ msg: "You do not have permission to access this function" });
+    }
+    const updatedtask = await Task.findByIdAndUpdate(id, req.body, { new: true });
+    if (!updatedtask) {
+      return res.status(404).json({ message: 'task not found' });
+    }
+    res.json({msg:"update successfully", updatedtask});
+    console.log(updatedtask);
+    console.log(updatedtask.isComplete);
+
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+
 /*......................................sanugi.......................*/
 
 exports.secure = async (req, res) => {
