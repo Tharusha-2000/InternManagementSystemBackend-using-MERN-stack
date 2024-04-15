@@ -91,29 +91,9 @@ router.put('/updateinterns',middleware.Auth,controller.updateinternprofile);
 
 /*..........................................project task part................................................ */
 router.get('/task',middleware.Auth,controller.getTask);
+router.post('/task',middleware.Auth,controller.createTask);
+router.delete('/task/:id',middleware.Auth,controller.deleteTask);
 
-
-router.post('/task',middleware.Auth,async(req, res) => {
-  // We want to create a new list and return the new list document back to the user (which includes the id)
-  // The list information (fields) will be passed in via the JSON request body
-  const { id } = req.data;
-  console.log(id);
-  if (req.data.role!=="intern"){
-    return res.status(401).send({ error: "You are not authorized to set this data" });
-   }
-
-  let title = req.body.title;
-  try{
-  const  newTask = new Task({
-      title,
-      _userId: id
-  });
-   const task=await newTask.save()
-  res.status(201).json(task);
-  }catch(error){
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-});
 
 router.delete('/task/:id',middleware.Auth, async (req, res) => {
   try {
