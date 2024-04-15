@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const ENV = require("../config.js");
 const otpGenerator = require("otp-generator");
 var nodemailer = require("nodemailer");
+const Task = require("../models/task.js");
 
 /*..............................login page.............................................*/
 /* POST: http://localhost:8000/api/users/login */
@@ -395,7 +396,19 @@ exports.updatedIntern= async (req, res) => {
 };
 
 
+/*......................................project details.......................*/
 
+exports.getTask=async (req, res)=> {
+  // We want to return an array of all the lists that belong to the authenticated user 
+  const { id } = req.data;
+  Task.find({
+      _userId:id
+  }).then((tasks) => {
+     res.json(tasks);
+  }).catch((e) => {
+      res.send(e);
+  });
+};
 
 
 

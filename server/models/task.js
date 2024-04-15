@@ -11,7 +11,12 @@ const TaskSchema = new mongoose.Schema({
     _userId: {
         type: mongoose.Types.ObjectId,
         required: true
+    },
+    isComplete: {
+        type: Boolean,
+        default: false
     }
+
 
 })
 

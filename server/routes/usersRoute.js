@@ -84,24 +84,14 @@ router.put('/updateinterns',middleware.Auth,controller.updateinternprofile);
 
 
 
-module.exports = router;
+
 
 
 
 
 /*..........................................project task part................................................ */
+router.get('/task',middleware.Auth,controller.getTask);
 
-router.get('/task',middleware.Auth, (req, res) => {
-  // We want to return an array of all the lists that belong to the authenticated user 
-  const { id } = req.data;
-  Task.find({
-      _userId:id
-  }).then((tasks) => {
-      res.send(tasks);
-  }).catch((e) => {
-      res.send(e);
-  });
-})
 
 router.post('/task',middleware.Auth,async(req, res) => {
   // We want to create a new list and return the new list document back to the user (which includes the id)
@@ -125,7 +115,7 @@ router.post('/task',middleware.Auth,async(req, res) => {
   }
 });
 
-router.post('/task',middleware.Auth, async (req, res) => {
+router.delete('/task/:id',middleware.Auth, async (req, res) => {
   try {
     if (req.data.role !== "intern") {
       return res
@@ -147,11 +137,34 @@ router.post('/task',middleware.Auth, async (req, res) => {
   }
 });
 
+router.put('/task/:id',middleware.Auth, async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (req.data.role !== "intern") {
+      return res
+        .status(403)
+        .json({ msg: "You do not have permission to access this function" });
+    }
+    const updatedtask = await Task.findByIdAndUpdate(id, req.body, { new: true });
+    if (!updatedtask) {
+      return res.status(404).json({ message: 'task not found' });
+    }
+    res.json({msg:"update successfully", updatedtask});
+    console.log(updatedtask);
+    console.log(updatedtask.isComplete);
+
+
+
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
 
 
 
 
 
+module.exports = router;
 
 
 
