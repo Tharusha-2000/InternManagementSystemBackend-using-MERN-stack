@@ -95,28 +95,6 @@ router.post('/task',middleware.Auth,controller.createTask);
 router.delete('/task/:id',middleware.Auth,controller.deleteTask);
 
 
-router.delete('/task/:id',middleware.Auth, async (req, res) => {
-  try {
-    if (req.data.role !== "intern") {
-      return res
-        .status(403)
-        .json({ msg: "You do not have permission to access this function" });
-    }
-    let id = req.params.id;
-    const task = await Task.findByIdAndDelete(id);
-      
-
-    if (!task) {
-      return res.status(404).send("task not found");
-    }
-
-    res.status(200).send({ msg: "task deleted" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send("Internal Server Error");
-  }
-});
-
 router.put('/task/:id',middleware.Auth, async (req, res) => {
   try {
     const { id } = req.params;
