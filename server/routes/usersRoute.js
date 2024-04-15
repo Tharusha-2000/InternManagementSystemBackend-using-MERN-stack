@@ -5,7 +5,7 @@ const router = express.Router();
 const controller = require('../authcontrol/controller')
 const mailer = require('../authcontrol/mailer')
 const User = require("../models/user");
-const Intern = require("../models/intern");
+const Task = require("../models/task.js");
 // const bcrypt = require("bcryptjs");
 // const jwt = require("jsonwebtoken");
 // const ENV= require('../config.js');
@@ -89,11 +89,63 @@ module.exports = router;
 
 
 
+/*..........................................project task part................................................ */
 
+router.get('/task',middleware.Auth, (req, res) => {
+  // We want to return an array of all the lists that belong to the authenticated user 
+  const { id } = req.data;
+  Task.find({
+      _userId:id
+  }).then((tasks) => {
+      res.send(tasks);
+  }).catch((e) => {
+      res.send(e);
+  });
+})
 
+router.post('/task',middleware.Auth,async(req, res) => {
+  // We want to create a new list and return the new list document back to the user (which includes the id)
+  // The list information (fields) will be passed in via the JSON request body
+  const { id } = req.data;
+  console.log(id);
+  if (req.data.role!=="intern"){
+    return res.status(401).send({ error: "You are not authorized to set this data" });
+   }
 
+  let title = req.body.title;
+  try{
+  const  newTask = new Task({
+      title,
+      _userId: id
+  });
+   const task=await newTask.save()
+  res.status(201).json(task);
+  }catch(error){
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+});
 
+router.post('/task',middleware.Auth, async (req, res) => {
+  try {
+    if (req.data.role !== "intern") {
+      return res
+        .status(403)
+        .json({ msg: "You do not have permission to access this function" });
+    }
+    let id = req.params.id;
+    const task = await Task.findByIdAndDelete(id);
+      
 
+    if (!task) {
+      return res.status(404).send("task not found");
+    }
+
+    res.status(200).send({ msg: "task deleted" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+});
 
 
 
