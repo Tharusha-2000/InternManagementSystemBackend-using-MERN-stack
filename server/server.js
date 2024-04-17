@@ -19,7 +19,7 @@ const app = express()
 
 
 app.use(cors({
-    origin: ["https://frontend-indol-three-11.vercel.app"],
+    origin: [" "],
     methods: ['GET', 'POST', 'PUT', "DELETE"],
     credentials: true
 }))
