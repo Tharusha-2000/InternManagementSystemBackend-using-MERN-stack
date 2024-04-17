@@ -8,12 +8,25 @@ const ENV= require('./config.js');
 
 
 const cvfilesRoutes = require('./routes/cvfiles.js');
+const Evaluationformdetails = require('./models/Evaluationformdetails');
+
+
+
+
+
+
+const userRoute = require("./routes/usersRoute.js");
+const internRoute = require("./routes/internRoute.js");
+
+
 const userRoute = require("./routes/usersRoute.js");
 const internRoute = require("./routes/internRoute.js");
 
 const body=require('body-parser');
 
 const app = express() 
+
+
 
 app.use(cors({
     origin: ["http://localhost:5173"],
@@ -35,6 +48,7 @@ app.use("/api/cvfiles", cvfilesRoutes)
 
 app.use("/api/users", internRoute);
 app.use("/api/users", userRoute);
+app.use("/api/users", internRoute);
 app.use(express.static('Public'))
 app.use(body.json());
 /*
@@ -59,8 +73,42 @@ const verifyUser = (req, res, next) => {
 */
 
 
+
+//--------------------------------dilum code for get evaluationlist -----------------
+
+/*app.post('/evaluationformdetails/all', async (req, res) => {
+    try {
+        // Import the Intern model
+        const Intern = require('./models/Intern');
+
+        // Find all interns in the Intern collection
+        const interns = await Intern.find();
+
+        // Create a new document in the Evaluationformdetails collection for each intern
+        const evaluationFormDetails = interns.map(intern => ({
+            user: intern._id,
+            eformstates: 'not created' // default value
+        }));
+
+        // Save all the documents to the database
+        const savedEvaluationFormDetails = await Evaluationformdetails.insertMany(evaluationFormDetails);
+
+        // Send the saved documents in the response
+        res.json(savedEvaluationFormDetails);
+    } catch (err) {
+        // Send an error response if something goes wrong
+        res.status(500).json({ error: err.message });
+    }
+});
+*/
+
+
+
+
+
  
-  app.listen(8001, () => {
+
+  app.listen(8000, () => {
       console.log("Server is running")
       
     })
