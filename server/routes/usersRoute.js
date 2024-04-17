@@ -136,38 +136,6 @@ module.exports = router;
 
 /*......................................sanugi.......................*/
 
-router.put("/secure", Auth, async (req, res) => {
-  const { id } = req.data;
-  const { Oldpassword, Newpassword } = req.body;
-
-  try {
-    const user = await User.findById(id);
-    console.log(user);
-    const validPassword = await bcrypt.compare(Oldpassword, user.password);
-    if (!validPassword) {
-      return res.status(400).send({ msg: "Invalid old password." });
-    }
-    const hashedPassword = await bcrypt.hash(Newpassword, 12);
-    user.password = hashedPassword;
-
-    await User.updateOne(
-      {
-        _id: id,
-      },
-      {
-        $set: {
-          password: hashedPassword,
-        },
-      }
-    );
-
-    return res.status(201).send({ msg: "Record Updated...!" });
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({ msg: "Internal Server Error" });
-  }
-});
-
 /*......................................hansi.......................*/
 
 
