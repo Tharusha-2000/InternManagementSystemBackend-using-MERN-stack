@@ -12,6 +12,12 @@ const Evaluationformdetails = require('./models/Evaluationformdetails');
 
 
 
+=======
+
+
+const userRoute = require("./routes/usersRoute.js");
+
+
 
 const userRoute = require("./routes/usersRoute.js");
 const internRoute = require("./routes/internRoute.js");
@@ -19,6 +25,8 @@ const internRoute = require("./routes/internRoute.js");
 const body=require('body-parser');
 
 const app = express() 
+
+
 
 app.use(cors({
     origin: ["http://localhost:5173"],
@@ -59,6 +67,7 @@ const verifyUser = (req, res, next) => {
 */
 
 
+
 //--------------------------------dilum code for get evaluationlist -----------------
 
 /*app.post('/evaluationformdetails/all', async (req, res) => {
@@ -92,6 +101,8 @@ const verifyUser = (req, res, next) => {
 
 
  
+=======
+
   app.listen(8000, () => {
       console.log("Server is running")
       
