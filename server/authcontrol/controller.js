@@ -456,9 +456,10 @@ exports.deleteTask= async (req, res) => {
 };
 
 
-exports.updateTask= async (req, res) => {
+exports.updateTask= async (req, res, next) => {
   try {
     const { id } = req.params;
+    
     if (req.data.role !== "intern") {
       return res
         .status(403)
@@ -471,6 +472,11 @@ exports.updateTask= async (req, res) => {
     res.json({msg:"update successfully", updatedtask});
     console.log(updatedtask);
     console.log(updatedtask.isComplete);
+    
+    if(updatedtask.isComplete){
+      next();
+      console.log(updatedtask.title);
+    }
 
   } catch (err) {
     res.status(400).json({ message: err.message });
