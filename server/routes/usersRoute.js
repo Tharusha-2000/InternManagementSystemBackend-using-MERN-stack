@@ -5,7 +5,7 @@ const router = express.Router();
 const controller = require('../authcontrol/controller')
 const mailer = require('../authcontrol/mailer')
 const User = require("../models/user");
-const Intern = require("../models/intern");
+const Task = require("../models/task.js");
 // const bcrypt = require("bcryptjs");
 // const jwt = require("jsonwebtoken");
 // const ENV= require('../config.js');
@@ -84,22 +84,26 @@ router.put('/updateinterns',middleware.Auth,controller.updateinternprofile);
 
 
 
+
+
+
+
+
+/*..........................................project task part................................................ */
+router.get('/task',middleware.Auth,controller.getTask);
+router.post('/task',middleware.Auth,controller.createTask);
+router.delete('/task/:id',middleware.Auth,controller.deleteTask);
+router.put('/task/:id',middleware.Auth,controller.updateTask,middleware.localVariables,mailer.sendingVerifyTaskMail);
+
+
+
+
+
+
+
+
+
 module.exports = router;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

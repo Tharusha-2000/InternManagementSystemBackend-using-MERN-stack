@@ -33,6 +33,7 @@ function localVariables(req, res, next){
         OTP : null,
         resetSession : false
     }
+   
     next();
 }
 
