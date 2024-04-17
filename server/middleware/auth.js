@@ -13,9 +13,10 @@ const ENV = require('../config.js');
         // retrive the user details fo the logged in user
         const decodedToken = await jwt.verify(token, ENV.JWT_SECRET);
 
-        req.user = decodedToken;
-
-        //res.json(decodedToken);
+        req.data = decodedToken;
+        console.log("decodedToken");
+        console.log(decodedToken);    
+       
 
         next()
 
@@ -32,6 +33,7 @@ function localVariables(req, res, next){
         OTP : null,
         resetSession : false
     }
+   
     next();
 }
 
