@@ -12,7 +12,7 @@ const body=require('body-parser');
 const app = express() 
 
 app.use(cors({
-    origin: ["https://frontend-indol-three-11.vercel.app"],
+    origin: ["https://imsfrontend.vercel.app"],
     methods: ['GET','POST','PUT',"DELETE"],
     credentials: true
 }))
