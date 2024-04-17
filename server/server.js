@@ -8,16 +8,6 @@ const dbconfig = require("./utils/db.js");
 const ENV= require('./config.js');
 
 
-const Evaluationformdetails = require('./models/Evaluationformdetails');
-
-
-
-=======
-
-
-const userRoute = require("./routes/usersRoute.js");
-
-
 
 const userRoute = require("./routes/usersRoute.js");
 const internRoute = require("./routes/internRoute.js");
@@ -29,7 +19,7 @@ const app = express()
 
 
 app.use(cors({
-    origin: ["http://localhost:5173"],
+    origin: ["https://frontend-indol-three-11.vercel.app"],
     methods: ['GET', 'POST', 'PUT', "DELETE"],
     credentials: true
 }))
