@@ -45,9 +45,21 @@ const internSchema = new mongoose.Schema({
   Bio:{
     type: String,
     required: false
+  },
+
+  fileURL: {
+    type: String,
+    required: false
   }
+  /*
+  fileURL: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Cvfiles', // Reference to the Cvfiles model
+    required: false
+  }
+*/
 });
 
-const Intern = mongoose.model("Intern", internSchema);
+const Intern = mongoose.model("Interns", internSchema);
 
 module.exports = Intern;

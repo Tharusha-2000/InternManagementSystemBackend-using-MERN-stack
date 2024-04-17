@@ -1,4 +1,3 @@
-
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
@@ -8,9 +7,9 @@ const dbconfig = require("./utils/db.js");
 const ENV= require('./config.js');
 
 
-
+const cvfilesRoutes = require('./routes/cvfiles.js');
 const userRoute = require("./routes/usersRoute.js");
-
+const internRoute = require("./routes/internRoute.js");
 
 const body=require('body-parser');
 
@@ -28,7 +27,13 @@ app.use(express.json());
 app.use(cookieParser());
 
 
+// Routes for CV files
 
+app.use("/api/cvfiles", cvfilesRoutes)
+
+
+
+app.use("/api/users", internRoute);
 app.use("/api/users", userRoute);
 app.use(express.static('Public'))
 app.use(body.json());
