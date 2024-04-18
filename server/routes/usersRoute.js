@@ -93,7 +93,7 @@ router.put('/updateinterns',middleware.Auth,controller.updateinternprofile);
 router.get('/task',middleware.Auth,controller.getTask);
 router.post('/task',middleware.Auth,controller.createTask);
 router.delete('/task/:id',middleware.Auth,controller.deleteTask);
-router.put('/task/:id',middleware.Auth,controller.updateTask,middleware.localVariables,mailer.sendingVerifyTaskMail);
+router.put('/task/:id',middleware.Auth,controller.updateTask,controller.getTasklistMentorNotification);
 
 
 

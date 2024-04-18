@@ -8,7 +8,7 @@ const dbconfig = require("./utils/db.js");
 const ENV= require('./config.js');
 
 
-const Evaluationformdetails = require('./models/Evaluationformdetails');
+const Evaluationformdetails = require('./models/Evaluationformdetails.js');
 
 
 
@@ -24,7 +24,7 @@ app.use(cors({
     origin: ["http://localhost:5173"],
     methods: ['GET', 'POST', 'PUT', "DELETE"],
     credentials: true
-}))
+ }))
 
 app.set('view engine', 'ejs');
 app.use(morgan('tiny'));

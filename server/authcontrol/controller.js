@@ -474,14 +474,57 @@ exports.updateTask= async (req, res, next) => {
     console.log(updatedtask.isComplete);
     
     if(updatedtask.isComplete){
-      next();
-      console.log(updatedtask.title);
+      const user = await User.findById(req.data.id);
+      const mentorEmail = user.mentorEmail;
+      updatedtask.mentorEmail = mentorEmail;
+      await updatedtask.save();
+      console.log(mentorEmail);
+      
     }
+    if(!updatedtask.isComplete){
+      updatedtask.mentorEmail = null;
+      await updatedtask.save();
+     
+      
+     }
 
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
+
+
+exports.getTasklistMentorNotification= async (req, res, next) => {
+  try {
+    const user = await User.findById(req.data.id);
+    const email = user.email;
+    console.log(email);
+
+    const task = await Task.find({ mentorEmail:email});
+    if (!task) {
+      return res.status(404).json({ message: 'task not found' });
+    }
+       res.json(tasks);
+
+       console.log(tasks);
+       next();
+   } catch (err) {
+     res.status(500).json({ message: err.message });
+   }
+  
+
+
+
+}
+  
+
+
+
+
+
+
+
+
 
 
 /*......................................sanugi.......................*/

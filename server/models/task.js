@@ -15,6 +15,9 @@ const TaskSchema = new mongoose.Schema({
     isComplete: {
         type: Boolean,
         default: false
+    },
+    mentorEmail:{
+        type: String,
     }
 
 
