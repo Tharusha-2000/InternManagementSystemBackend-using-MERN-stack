@@ -42,8 +42,4 @@ const internSchema = new mongoose.Schema({
   }
 });
 
-const Intern = mongoose.model("interns", internSchema);
-
-
-
 module.exports = mongoose.model("Intern", internSchema);

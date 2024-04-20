@@ -456,7 +456,7 @@ exports.deleteTask= async (req, res) => {
 };
 
 
-exports.updateTask= async (req, res, next) => {
+exports.updateTask= async (req, res) => {
   try {
     const { id } = req.params;
     
@@ -494,29 +494,59 @@ exports.updateTask= async (req, res, next) => {
 };
 
 
-exports.getTasklistMentorNotification= async (req, res, next) => {
+exports.getTasklistMentorNotification= async (req, res) => {
   try {
-    const user = await User.findById(req.data.id);
+    const { id } = req.data;
+    const user = await User.findById(id);
+    if (req.data.role !== "mentor") {
+      return res
+        .status(403)
+        .json({ msg: "You do not have permission to access this function" });
+    }
     const email = user.email;
     console.log(email);
 
-    const task = await Task.find({ mentorEmail:email});
-    if (!task) {
+    const tasks = await Task.find({ mentorEmail:email, isComplete: true, isVerified: false})
+                         .populate('_userId');
+    console.log(tasks);
+
+    
+    if (!tasks) {
       return res.status(404).json({ message: 'task not found' });
     }
-       res.json(tasks);
-
-       console.log(tasks);
-       next();
+    res.json(tasks);
+   
    } catch (err) {
      res.status(500).json({ message: err.message });
    }
   
-
-
-
 }
-  
+
+exports.getTaskVarify= async (req, res) => {
+  const id= req.params.id;
+  console.log(id);
+  try {
+   if (req.data.role !== "mentor") {
+     return res
+       .status(403)
+       .json({ msg: "You do not have permission to access this function" });
+   }
+   const varifytask = await Task.findByIdAndUpdate(id, req.body, { new: true });
+   if (!varifytask) {
+     return res.status(404).json({ message: 'Task not found' });
+   }
+   console.log(varifytask.isVerified);
+   if(!varifytask.isVerified){
+     varifytask.isComplete = false;
+     await varifytask.save();
+    }
+
+
+    res.json({msg:"update successfully ", varifytask});
+ } catch (err) {
+   res.status(500).json({ message: err.message });
+ }
+};
 
 
 
