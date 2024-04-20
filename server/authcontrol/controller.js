@@ -399,8 +399,10 @@ exports.updatedIntern= async (req, res) => {
 /*......................................project details.......................*/
 
 exports.getTask=async (req, res)=> {
-  // We want to return an array of all the lists that belong to the authenticated user 
   const { id } = req.data;
+  if (req.data.role!=="intern"){
+    return res.status(401).send({ error: "You are not authorized to set this data" });
+   }
   Task.find({
       _userId:id
   }).then((tasks) => {
@@ -412,8 +414,6 @@ exports.getTask=async (req, res)=> {
 
 
 exports.createTask=async(req, res) => {
-  // We want to create a new list and return the new list document back to the user (which includes the id)
-  // The list information (fields) will be passed in via the JSON request body
   const { id } = req.data;
   console.log(id);
   if (req.data.role!=="intern"){
@@ -548,6 +548,19 @@ exports.getTaskVarify= async (req, res) => {
  }
 };
 
+exports.getTaskIntern=async (req, res)=> {
+  const { id } = req.params;
+  if (req.data.role ==="intern"){
+    return res.status(401).send({ error: "You are not authorized to set this data" });
+   }
+  Task.find({
+      _userId:id
+  }).then((tasks) => {
+     res.json(tasks);
+  }).catch((e) => {
+      res.send(e);
+  });
+};
 
 
 

@@ -35,6 +35,9 @@ router.delete('/task/:id',middleware.Auth,controller.deleteTask);
 router.put('/task/:id',middleware.Auth,controller.updateTask);
 router.get('/taskNotify',middleware.Auth,controller.getTasklistMentorNotification);
 router.put('/taskVerify/:id',middleware.Auth,controller.getTaskVarify);
+router.get('/task/:id',middleware.Auth,controller.getTaskIntern);
+
+
 
 
 
