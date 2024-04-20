@@ -27,6 +27,17 @@ router.put('/users/:id',middleware.Auth,controller.changeRole);
 router.post("/register",middleware.Auth,controller.register,mailer.sendWelcomeEmail);
 
 
+
+/*..........................................project task part................................................ */
+router.get('/task',middleware.Auth,controller.getTask);
+router.post('/task',middleware.Auth,controller.createTask);
+router.delete('/task/:id',middleware.Auth,controller.deleteTask);
+router.put('/task/:id',middleware.Auth,controller.updateTask);
+router.get('/taskNotify',middleware.Auth,controller.getTasklistMentorNotification);
+router.put('/taskVerify/:id',middleware.Auth,controller.getTaskVarify);
+
+
+
 /*..........................................secure................................................. */
 router.put('/secure',middleware.Auth,controller.secure);
 
@@ -89,45 +100,12 @@ router.put('/updateinterns',middleware.Auth,controller.updateinternprofile);
 
 
 
-/*..........................................project task part................................................ */
-router.get('/task',middleware.Auth,controller.getTask);
-router.post('/task',middleware.Auth,controller.createTask);
-router.delete('/task/:id',middleware.Auth,controller.deleteTask);
-router.put('/task/:id',middleware.Auth,controller.updateTask);
-router.get('/taskNotify',middleware.Auth,controller.getTasklistMentorNotification);
-router.put('/taskVerify/:id',middleware.Auth,controller.getTaskVarify);
-
 
 
 
 
 
 module.exports = router;
-
-
-
- 
-
-
-
-
-// /* GET: http://localhost:8000/api/users/user/dinu */
-// router.get("/user/:username", async (req, res) => {
-//         const { username } = req.params;
-//   try {
-//       if (!username) return res.status(501).send({ error: "Invalid Username" });
-//         const user = await User.findOne({ username });
-
-//       if (!user) return res.status(501).send({ error: "Couldn't Find the User" });
-//       //romove hash password
-//         const {password,...rest} = Object.assign({}, user.toJSON());
-//         return res.status(201).send(rest);
-
-//       }catch(error){
-//           return res.status(404).send({ error: "Cannot Find User Data" });
-//       }
-//       });
-
 
 
 
