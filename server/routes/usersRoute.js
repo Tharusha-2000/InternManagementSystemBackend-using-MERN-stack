@@ -37,17 +37,14 @@ router.get('/taskNotify',middleware.Auth,controller.getTasklistMentorNotificatio
 router.put('/taskVerify/:id',middleware.Auth,controller.getTaskVarify);
 router.get('/task/:id',middleware.Auth,controller.getTaskIntern);
 
-
-
-
-
 /*..........................................secure................................................. */
 router.put('/secure',middleware.Auth,controller.secure);
+/*..........................................create intren profile................................................ */
 
-
-
-
-
+router.get('/interns', middleware.Auth,controller.getInternList);
+router.get('/interns/:id', middleware.Auth,controller.getIntern);
+router.put('/interns/:id',middleware.Auth,controller.updatedIntern);
+router.put('/updateinterns',middleware.Auth,controller.updateinternprofile);
 
 /*..........................................profile create................................................. */
 
@@ -87,12 +84,6 @@ router.post('/uploadImage', middleware.Auth,upload.single('image'), async (req, 
       }
 
 });
-/*..........................................create intren profile................................................ */
-
-router.get('/interns', middleware.Auth,controller.getInternList);
-router.get('/interns/:id', middleware.Auth,controller.getIntern);
-router.put('/interns/:id',middleware.Auth,controller.updatedIntern);
-router.put('/updateinterns',middleware.Auth,controller.updateinternprofile);
 
 /*..........................................evaluvationpart................................................. */
 

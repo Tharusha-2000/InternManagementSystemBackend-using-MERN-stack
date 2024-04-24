@@ -90,7 +90,7 @@ exports.sendWelcomeEmail = (req, res) => {
       res.status(201).json({ msg: "User signed in successfully", success: true});
     }catch (error) {
       console.error(error);
-      res.status(500).send({ error: "Internal Server Error" });
+      res.status(500).json({ error: "Internal Server Error" });
     }
  
 };

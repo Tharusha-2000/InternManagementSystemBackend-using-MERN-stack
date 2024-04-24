@@ -9,7 +9,7 @@ var nodemailer = require("nodemailer");
 const Task = require("../models/task.js");
 
 /*..............................login page.............................................*/
-/* POST: http://localhost:8000/api/users/login */
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -38,9 +38,7 @@ exports.login = async (req, res) => {
       { expiresIn: "3d" }
     );
 
-    //res.cookie('token', token);
-
-    res.status(200).send({
+    res.status(200).json({
       msg: "Login Successful...!",
       username: user.username,
       role: user.role,
@@ -54,7 +52,8 @@ exports.login = async (req, res) => {
   }
 };
 
-/** POST: http://localhost:8000/api/users/generateOTP */
+
+/*generateOTP in 6 digit */
 exports.generateOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -80,7 +79,8 @@ exports.generateOTP = async (req, res, next) => {
   }
 };
 
-/** GET: http://localhost:8000/api/users/verifyOTP */
+
+/* verifyOTP that email */
 exports.verifyOTP = async (req, res) => {
   const { code } = req.query;
 
@@ -97,10 +97,12 @@ exports.verifyOTP = async (req, res) => {
   return res.status(400).send({ msg: "Invalid OTP" });
 };
 
+
+/* reset password */
 exports.resetPassword = async (req, res) => {
   try {
     if (!req.app.locals.resetSession)
-      return res.status(440).send({ msg: "Session expired!" });
+      return res.status(440).json({ msg: "Session expired!" });
 
     const { email, password } = req.body;
 
@@ -121,17 +123,18 @@ exports.resetPassword = async (req, res) => {
         }
       );
       req.app.locals.resetSession = false; // reset session
-      return res.status(201).send({ msg: "Record Updated...!" });
+      return res.status(201).json({ msg: "Record Updated...!" });
     } catch (error) {
-      return res.status(500).send({ error });
+      return res.status(500).json({ error });
     }
   } catch (error) {
-    return res.status(401).send({ error: "Invalid Request" });
+    return res.status(401).json({ error: "Invalid Request" });
   }
 };
 
 /*.............................registation add user table............................*/
 
+ // Fetch all users from the user database
 exports.getUsers = async (req, res) => {
   try {
     if (req.data.role !== "admin") {
@@ -144,10 +147,11 @@ exports.getUsers = async (req, res) => {
     const data = res.status(201).json({ success: true, users });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).json("Internal Server Error");
   }
 };
 
+ // deleteuser  from the user database
 exports.deleteUser = async (req, res) => {
   try {
     if (req.data.role !== "admin") {
@@ -162,20 +166,20 @@ exports.deleteUser = async (req, res) => {
     if (req.data.id === id) {
       return res
         .status(403)
-        .send({ msg: "You do not have permission to access this function" });
+        .json({ msg: "You do not have permission to access this function" });
     }
 
     if (!user) {
-      return res.status(404).send("User not found");
+      return res.status(404).json("User not found");
     }
 
-    res.status(200).send({ msg: "User deleted" });
+    res.status(200).json({ msg: "User deleted" });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).json("Internal Server Error");
   }
 };
-
+// changerole  from the user database
 exports.changeRole = async (req, res) => {
   const { role } = req.body;
   const { id } = req.params;
@@ -183,16 +187,13 @@ exports.changeRole = async (req, res) => {
     if (req.data.role !== "admin") {
       return res
         .status(403)
-        .send({ msg: "You do not have permission to access this function" });
+        .json({ msg: "You do not have permission to access this function" });
     }
-
-    // console.log(req.data.role);
-   
     //console.log(id);
     const user = await User.findById(id);
     //not necessary
     if (!user) {
-      return res.status(404).send("User not found");
+      return res.status(404).json("User not found");
     }
     await User.updateOne(
       {
@@ -209,16 +210,18 @@ exports.changeRole = async (req, res) => {
       if (role !== "admin") {
         return res
           .status(403)
-          .send({ msg: "You do not have permission to access this function" });
+          .json({ msg: "You do not have permission to access this function" });
       }
     }
 
-    return res.status(201).send({ msg: "Record Updated...!" });
+    return res.status(201).json({ msg: "Record Updated...!" });
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
   }
 };
+
+//register user
 
 exports.register = async (req, res, next) => {
   try {
@@ -255,27 +258,8 @@ exports.register = async (req, res, next) => {
   }
 };
 
-const multer = require("multer");
-//const upload = multer({ dest: "uploads/" });
 /*..............................create user profile.............................. */
-//exports.uploadImage = async (req, res) => {
-//     const { base64} = req.body;
-//     const { id } = req.data;
-//     try {
-//       const user = await User.findById(id);
-//       if (!user) {
-//         return res.status(404).json({ msg: "User not found" });
-//       }
-//       user.image = base64;
-//       await user.save();
-//       res.json({ msg: "Image uploaded successfully" });
-//     } catch (error) {
-//       res.status(500).json({ msg: "Internal Server Error" });
-//     }
-//   };
-const fs = require('fs');
-const path = require('path');
-
+//read user profile
 exports.getUser = async (req, res) => {
      const { id } = req.data;
    try {
@@ -288,6 +272,7 @@ exports.getUser = async (req, res) => {
   };
 
 
+//update user profile
 exports.updateuser=async (req, res) => {
     const { id } = req.data;
     try {
