@@ -1,9 +1,5 @@
-const ENV= require('../config.js');
 const  mongoose  = require("mongoose");
-require("dotenv").config();
-var mongoURL = ENV.DBUrl;
-const User = require('../models/user.js'); // Use uppercase for model names
-const Intern = require('../models/intern.js'); 
+var mongoURL = process.env.DBUrl;
 mongoose.connect(process.env.MONGODB_URI || mongoURL)
     .then(() => {
 

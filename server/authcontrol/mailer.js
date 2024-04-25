@@ -1,7 +1,7 @@
-const ENV= require('../config.js');
 var nodemailer = require('nodemailer');
-
-
+const otpGenerator = require("otp-generator");
+const User = require("../models/user.js");
+const Task = require("../models/task.js");
 exports.sendingOTPMail = async (req, res) => {
     try {
       const { email } = req.body;
@@ -11,13 +11,13 @@ exports.sendingOTPMail = async (req, res) => {
         service: 'gmail',
         port: 534,
          auth: {
-           user: ENV.Email,
-           pass: ENV.Password
+           user: process.env.Email,
+           pass: process.env.Password
          }
        });
      
      var mailOptions = {
-        from: ENV.Email,
+        from: process.env.Email,
         to: email,
         subject: 'Sending Email using Node.js',
         html:`
@@ -55,13 +55,13 @@ exports.sendWelcomeEmail = (req, res) => {
         service: 'gmail',
         port: 534,
         auth: {
-          user: ENV.Email,
-          pass: ENV.Password
+          user: process.env.Email,
+          pass: process.env.Password
         }
       });
       
       var mailOptions = {
-        from: ENV.Email,
+        from: process.env.Email,
         to: email,
         subject: 'Sending Email using Node.js',
         html:  `
@@ -89,7 +89,8 @@ exports.sendWelcomeEmail = (req, res) => {
       res.status(201).json({ msg: "User signed in successfully", success: true});
     }catch (error) {
       console.error(error);
-      res.status(500).send({ error: "Internal Server Error" });
+      res.status(500).json({ error: "Internal Server Error" });
     }
  
 };
+
