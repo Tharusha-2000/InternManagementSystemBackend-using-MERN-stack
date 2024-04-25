@@ -1,14 +1,12 @@
 const User = require("../models/user.js");
-const Intern = require("../models/intern");
 const EvaluationFormDetails = require('../models/Evaluationformdetails');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const ENV = require("../config.js");
 const otpGenerator = require("otp-generator");
-var nodemailer = require("nodemailer");
+const Task = require("../models/task.js");
 
 /*..............................login page.............................................*/
-/* POST: http://localhost:8000/api/users/login */
+
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -33,13 +31,11 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign(
       { email: user.email, id: user._id, role: user.role },
-      ENV.JWT_SECRET,
+      process.env.JWT_SECRET,
       { expiresIn: "3d" }
     );
 
-    //res.cookie('token', token);
-
-    res.status(200).send({
+    res.status(200).json({
       msg: "Login Successful...!",
       username: user.username,
       role: user.role,
@@ -53,7 +49,8 @@ exports.login = async (req, res) => {
   }
 };
 
-/** POST: http://localhost:8000/api/users/generateOTP */
+
+/*generateOTP in 6 digit */
 exports.generateOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -79,7 +76,8 @@ exports.generateOTP = async (req, res, next) => {
   }
 };
 
-/** GET: http://localhost:8000/api/users/verifyOTP */
+
+/* verifyOTP that email */
 exports.verifyOTP = async (req, res) => {
   const { code } = req.query;
 
@@ -96,10 +94,12 @@ exports.verifyOTP = async (req, res) => {
   return res.status(400).send({ msg: "Invalid OTP" });
 };
 
+
+/* reset password */
 exports.resetPassword = async (req, res) => {
   try {
     if (!req.app.locals.resetSession)
-      return res.status(440).send({ msg: "Session expired!" });
+      return res.status(440).json({ msg: "Session expired!" });
 
     const { email, password } = req.body;
 
@@ -120,17 +120,18 @@ exports.resetPassword = async (req, res) => {
         }
       );
       req.app.locals.resetSession = false; // reset session
-      return res.status(201).send({ msg: "Record Updated...!" });
+      return res.status(201).json({ msg: "Record Updated...!" });
     } catch (error) {
-      return res.status(500).send({ error });
+      return res.status(500).json({ error });
     }
   } catch (error) {
-    return res.status(401).send({ error: "Invalid Request" });
+    return res.status(401).json({ error: "Invalid Request" });
   }
 };
 
 /*.............................registation add user table............................*/
 
+ // Fetch all users from the user database
 exports.getUsers = async (req, res) => {
   try {
     if (req.data.role !== "admin") {
@@ -143,10 +144,11 @@ exports.getUsers = async (req, res) => {
     const data = res.status(201).json({ success: true, users });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).json("Internal Server Error");
   }
 };
 
+ // deleteuser  from the user database
 exports.deleteUser = async (req, res) => {
   try {
     if (req.data.role !== "admin") {
@@ -161,20 +163,20 @@ exports.deleteUser = async (req, res) => {
     if (req.data.id === id) {
       return res
         .status(403)
-        .send({ msg: "You do not have permission to access this function" });
+        .json({ msg: "You do not have permission to access this function" });
     }
 
     if (!user) {
-      return res.status(404).send("User not found");
+      return res.status(404).json("User not found");
     }
 
-    res.status(200).send({ msg: "User deleted" });
+    res.status(200).json({ msg: "User deleted" });
   } catch (error) {
     console.error(error);
-    res.status(500).send("Internal Server Error");
+    res.status(500).json("Internal Server Error");
   }
 };
-
+// changerole  from the user database
 exports.changeRole = async (req, res) => {
   const { role } = req.body;
   const { id } = req.params;
@@ -182,16 +184,13 @@ exports.changeRole = async (req, res) => {
     if (req.data.role !== "admin") {
       return res
         .status(403)
-        .send({ msg: "You do not have permission to access this function" });
+        .json({ msg: "You do not have permission to access this function" });
     }
-
-    // console.log(req.data.role);
-   
     //console.log(id);
     const user = await User.findById(id);
     //not necessary
     if (!user) {
-      return res.status(404).send("User not found");
+      return res.status(404).json("User not found");
     }
     await User.updateOne(
       {
@@ -208,16 +207,18 @@ exports.changeRole = async (req, res) => {
       if (role !== "admin") {
         return res
           .status(403)
-          .send({ msg: "You do not have permission to access this function" });
+          .json({ msg: "You do not have permission to access this function" });
       }
     }
 
-    return res.status(201).send({ msg: "Record Updated...!" });
+    return res.status(201).json({ msg: "Record Updated...!" });
   } catch (err) {
     console.error(err);
     res.status(500).send("Server error");
   }
 };
+
+//register user
 
 exports.register = async (req, res, next) => {
   try {
@@ -226,12 +227,12 @@ exports.register = async (req, res, next) => {
         .status(403)
         .json({ msg: "You do not have permission to access this function" });
     }
-
     const { fname, lname, dob, role, gender, email, password,jobtitle,employmentType,department} = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.json({ msg: "User already exists" });
     }
+
     const user = await User.create({
       fname,
       lname,
@@ -254,27 +255,8 @@ exports.register = async (req, res, next) => {
   }
 };
 
-const multer = require("multer");
-//const upload = multer({ dest: "uploads/" });
 /*..............................create user profile.............................. */
-//exports.uploadImage = async (req, res) => {
-//     const { base64} = req.body;
-//     const { id } = req.data;
-//     try {
-//       const user = await User.findById(id);
-//       if (!user) {
-//         return res.status(404).json({ msg: "User not found" });
-//       }
-//       user.image = base64;
-//       await user.save();
-//       res.json({ msg: "Image uploaded successfully" });
-//     } catch (error) {
-//       res.status(500).json({ msg: "Internal Server Error" });
-//     }
-//   };
-const fs = require('fs');
-const path = require('path');
-
+//read user profile
 exports.getUser = async (req, res) => {
      const { id } = req.data;
    try {
@@ -287,6 +269,7 @@ exports.getUser = async (req, res) => {
   };
 
 
+//update user profile
 exports.updateuser=async (req, res) => {
     const { id } = req.data;
     try {
@@ -395,6 +378,175 @@ exports.updatedIntern= async (req, res) => {
 };
 
 
+/*......................................project details.......................*/
+
+exports.getTask=async (req, res)=> {
+  const { id } = req.data;
+  if (req.data.role!=="intern"){
+    return res.status(401).send({ error: "You are not authorized to set this data" });
+   }
+  Task.find({
+      _userId:id
+  }).then((tasks) => {
+     res.json(tasks);
+  }).catch((e) => {
+      res.json(e);
+  });
+};
+
+
+exports.createTask=async(req, res) => {
+  const { id } = req.data;
+  console.log(id);
+  if (req.data.role!=="intern"){
+    return res.status(401).json({ error: "You are not authorized to set this data" });
+   }
+
+  let title = req.body.title;
+  try{
+  const  newTask = new Task({
+      title,
+      _userId: id
+  });
+   const task=await newTask.save()
+  res.status(201).json(task);
+  }catch(error){
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
+
+exports.deleteTask= async (req, res) => {
+  try {
+    if (req.data.role !== "intern") {
+      return res
+        .status(403)
+        .json({ msg: "You do not have permission to access this function" });
+    }
+    let id = req.params.id;
+    const task = await Task.findByIdAndDelete(id);
+      
+
+    if (!task) {
+      return res.status(404).json("task not found");
+    }
+
+    res.status(200).send({ msg: "task deleted" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+};
+
+
+exports.updateTask= async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    if (req.data.role !== "intern") {
+      return res
+        .status(403)
+        .json({ msg: "You do not have permission to access this function" });
+    }
+    const updatedtask = await Task.findByIdAndUpdate(id, req.body, { new: true });
+    if (!updatedtask) {
+      return res.status(404).json({ message: 'task not found' });
+    }
+    res.json({msg:"update successfully", updatedtask});
+    console.log(updatedtask);
+    console.log(updatedtask.isComplete);
+    
+    if(updatedtask.isComplete){
+      const user = await User.findById(req.data.id);
+      const mentorEmail = user.mentorEmail;
+      updatedtask.mentorEmail = mentorEmail;
+      await updatedtask.save();
+      console.log(mentorEmail);
+      
+    }
+    if(!updatedtask.isComplete){
+      updatedtask.mentorEmail = null;
+      await updatedtask.save();
+     
+      
+     }
+
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+};
+
+
+exports.getTasklistMentorNotification= async (req, res) => {
+  try {
+    const { id } = req.data;
+    const user = await User.findById(id);
+    if (req.data.role !== "mentor") {
+      return res
+        .status(403)
+        .json({ msg: "You do not have permission to access this function" });
+    }
+    const email = user.email;
+    console.log(email);
+
+    const tasks = await Task.find({ mentorEmail:email, isComplete: true, isVerified: false})
+                         .populate('_userId');
+    console.log(tasks);
+
+    
+    if (!tasks) {
+      return res.status(404).json({ message: 'task not found' });
+    }
+    res.json(tasks);
+   
+   } catch (err) {
+     res.status(500).json({ message: err.message });
+   }
+  
+}
+
+exports.getTaskVarify= async (req, res) => {
+  const id= req.params.id;
+  console.log(id);
+  try {
+   if (req.data.role !== "mentor") {
+     return res
+       .status(403)
+       .json({ msg: "You do not have permission to access this function" });
+   }
+   const varifytask = await Task.findByIdAndUpdate(id, req.body, { new: true });
+   if (!varifytask) {
+     return res.status(404).json({ message: 'Task not found' });
+   }
+   console.log(varifytask.isVerified);
+   if(!varifytask.isVerified){
+     varifytask.isComplete = false;
+     await varifytask.save();
+    }
+
+
+    res.json({msg:"update successfully ", varifytask});
+ } catch (err) {
+   res.status(500).json({ message: err.message });
+ }
+};
+
+exports.getTaskIntern=async (req, res)=> {
+  const { id } = req.params;
+  if (req.data.role ==="intern"){
+    return res.status(401).json({ error: "You are not authorized to set this data" });
+   }
+  Task.find({
+      _userId:id
+  }).then((tasks) => {
+     res.json(tasks);
+  }).catch((e) => {
+      res.send(e);
+  });
+};
+
+
+
+
 
 
 
@@ -436,7 +588,7 @@ exports.secure = async (req, res) => {
 
 /*......................................sanugi.......................*/
 
-
+ 
 /*......................................dilum.......................*/
 
 

@@ -81,6 +81,11 @@ const userSchema = mongoose.Schema(
     type: String,
     //required: true
   },
+  
+  mentorEmail: {
+    type: String,
+  
+  },
   phonenumber: {
     type: Number,
    // required: true
