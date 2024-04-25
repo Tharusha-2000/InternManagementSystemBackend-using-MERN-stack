@@ -102,9 +102,6 @@ router.post('/uploadImage', middleware.Auth,upload.single('image'), async (req, 
 module.exports = router;
 
 
-
-
-=======
 /*......................................sanugi.......................*/
 
 
