@@ -1,4 +1,3 @@
-const ENV= require('../config.js');
 var nodemailer = require('nodemailer');
 const otpGenerator = require("otp-generator");
 const User = require("../models/user.js");
@@ -12,13 +11,13 @@ exports.sendingOTPMail = async (req, res) => {
         service: 'gmail',
         port: 534,
          auth: {
-           user: ENV.Email,
-           pass: ENV.Password
+           user: process.env.Email,
+           pass: process.env.Password
          }
        });
      
      var mailOptions = {
-        from: ENV.Email,
+        from: process.env.Email,
         to: email,
         subject: 'Sending Email using Node.js',
         html:`
@@ -56,13 +55,13 @@ exports.sendWelcomeEmail = (req, res) => {
         service: 'gmail',
         port: 534,
         auth: {
-          user: ENV.Email,
-          pass: ENV.Password
+          user: process.env.Email,
+          pass: process.env.Password
         }
       });
       
       var mailOptions = {
-        from: ENV.Email,
+        from: process.env.Email,
         to: email,
         subject: 'Sending Email using Node.js',
         html:  `

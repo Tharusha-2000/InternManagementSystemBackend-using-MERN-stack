@@ -1,11 +1,8 @@
 const User = require("../models/user.js");
-const Intern = require("../models/intern");
 const EvaluationFormDetails = require('../models/Evaluationformdetails');
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const ENV = require("../config.js");
 const otpGenerator = require("otp-generator");
-var nodemailer = require("nodemailer");
 const Task = require("../models/task.js");
 
 /*..............................login page.............................................*/
@@ -34,7 +31,7 @@ exports.login = async (req, res) => {
 
     const token = jwt.sign(
       { email: user.email, id: user._id, role: user.role },
-      ENV.JWT_SECRET,
+      process.env.JWT_SECRET,
       { expiresIn: "3d" }
     );
 
@@ -230,12 +227,12 @@ exports.register = async (req, res, next) => {
         .status(403)
         .json({ msg: "You do not have permission to access this function" });
     }
-
     const { fname, lname, dob, role, gender, email, password,jobtitle,employmentType,department} = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.json({ msg: "User already exists" });
     }
+
     const user = await User.create({
       fname,
       lname,
@@ -393,7 +390,7 @@ exports.getTask=async (req, res)=> {
   }).then((tasks) => {
      res.json(tasks);
   }).catch((e) => {
-      res.send(e);
+      res.json(e);
   });
 };
 
@@ -402,7 +399,7 @@ exports.createTask=async(req, res) => {
   const { id } = req.data;
   console.log(id);
   if (req.data.role!=="intern"){
-    return res.status(401).send({ error: "You are not authorized to set this data" });
+    return res.status(401).json({ error: "You are not authorized to set this data" });
    }
 
   let title = req.body.title;
@@ -430,7 +427,7 @@ exports.deleteTask= async (req, res) => {
       
 
     if (!task) {
-      return res.status(404).send("task not found");
+      return res.status(404).json("task not found");
     }
 
     res.status(200).send({ msg: "task deleted" });
@@ -536,7 +533,7 @@ exports.getTaskVarify= async (req, res) => {
 exports.getTaskIntern=async (req, res)=> {
   const { id } = req.params;
   if (req.data.role ==="intern"){
-    return res.status(401).send({ error: "You are not authorized to set this data" });
+    return res.status(401).json({ error: "You are not authorized to set this data" });
    }
   Task.find({
       _userId:id
