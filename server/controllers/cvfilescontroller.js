@@ -1,26 +1,58 @@
-import Cvfiles from "../models/Cvfiles.js";
+const CVFiles = require("../models/Cvfiles.js");
 
-export const createCvfiles = async (req, res) => {
-    const { fileURL } = req.body;
+const createCvfiles = async function(req, res) {
+  const { fileURL, userId } = req.body;
+  if (!fileURL || !userId) {
+    return res.status(400).json({ msg: "Please provide both fileURL and userId" });
+  }
 
-    if (!fileURL) {
-        res.status(400);
-        throw new Error("fileURL is required");
+  const newCvFile = new CVFiles({
+    fileURL,
+    userId
+  });
+
+  await newCvFile.save();
+
+  res.status(201).json(newCvFile);
+}
+
+
+const getCvfiles = async function(req, res) {
+    const { userId } = req.params;
+    if (!userId) {
+      return res.status(400).json({ msg: "userId is required" });
     }
-
+  
     try {
-        const cvfiles = await Cvfiles.create({
-            fileURL,
-        });
+      const cvfiles = await CVFiles.find({ userId }, 'fileURL');
+      res.status(200).json(cvfiles);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ msg: "Internal Server Error" });
+    }
+  }
 
-        res.status(201).json({
-            sucess: true,
-            cvfiles,
-        });
+
+  const deleteCvfile = async function(req, res) {
+    const { userId } = req.params;
+    if (!userId) {
+      return res.status(400).json({ msg: "userId is required" });
     }
-    catch (error) {
-        console.log(error);
-        res.status(400);
-        throw error;
+  
+    try {
+      const cvfile = await CVFiles.findOneAndDelete({ userId });
+      if (!cvfile) {
+        return res.status(404).json({ msg: "CV file not found" });
+      }
+  
+      res.status(200).json({ msg: "CV file deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ msg: "Internal Server Error" });
     }
-};
+  }
+
+
+module.exports = { createCvfiles, getCvfiles, deleteCvfile };
+
+

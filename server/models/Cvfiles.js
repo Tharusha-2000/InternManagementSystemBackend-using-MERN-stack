@@ -1,9 +1,14 @@
-import mongoose from 'mongoose';	
+const mongoose = require('mongoose');	
 
-const cvfilesSchema = new mongoose.Schema(
+const CVFilesSchema = new mongoose.Schema(
     {
         fileURL: {
             type: String,
+            required: true,
+        },
+        userId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'User',
             required: true,
         }
     }, 
@@ -13,4 +18,6 @@ const cvfilesSchema = new mongoose.Schema(
     
 ); 
 
-export default mongoose.model("Cvfiles", cvfilesSchema);	
+const CVFiles = mongoose.model("cvfiles", CVFilesSchema);
+
+module.exports = CVFiles;	

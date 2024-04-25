@@ -7,16 +7,7 @@ const dbconfig = require("./utils/db.js");
 const ENV= require('./config.js');
 
 
-const cvfilesRoutes = require('./routes/cvfiles.js');
 const Evaluationformdetails = require('./models/Evaluationformdetails');
-
-
-
-
-
-
-const userRoute = require("./routes/usersRoute.js");
-const internRoute = require("./routes/internRoute.js");
 
 
 const userRoute = require("./routes/usersRoute.js");
@@ -39,10 +30,6 @@ app.use(morgan('tiny'));
 app.use(express.json());
 app.use(cookieParser());
 
-
-// Routes for CV files
-
-app.use("/api/cvfiles", cvfilesRoutes)
 
 
 
@@ -103,12 +90,20 @@ const verifyUser = (req, res, next) => {
 */
 
 
+// -------- cv files 
+const { createCvfiles,  getCvfiles, deleteCvfile } = require('./controllers/cvfilescontroller');
+app.post('/api/cvfiles', createCvfiles);
+
+app.get('/api/cvfiles/:userId', getCvfiles);
+
+app.delete('/api/cvfiles/:userId', deleteCvfile);
+
 
 
 
  
 
-  app.listen(8000, () => {
+app.listen(8000, () => {
       console.log("Server is running")
       
     })

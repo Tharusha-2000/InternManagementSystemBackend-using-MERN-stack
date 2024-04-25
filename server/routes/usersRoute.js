@@ -10,6 +10,9 @@ const Task = require("../models/task.js");
 // const ENV= require('../config.js');
 const middleware = require('../middleware/auth.js');
 
+const CVFiles = require("../models/Cvfiles.js");
+const { createCvfiles, deleteCvfile } = require("../controllers/cvfilescontroller.js");
+const { getCvfiles } = require("../controllers/cvfilescontroller.js");
 
 // var nodemailer = require('nodemailer');
 
@@ -106,7 +109,31 @@ router.put('/task/:id',middleware.Auth,controller.updateTask,middleware.localVar
 
 
 /*..........................................cvupload................................................. */
-router.get('/intern', controller.getIntern);
+
+
+// upload cv files URL
+router.post("/api/cvfiles", middleware.Auth, async (req, res) => {
+  try {
+    await createCvfiles(req, res);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ msg: "Internal Server Error" });
+  }
+});
+
+// View cv file URL
+router.get("/api/cvfiles/:userId", middleware.Auth, getCvfiles);
+
+// Delete cv file URL
+router.delete("/api/cvfiles/:userId", middleware.Auth, deleteCvfile);
+
+
+
+
+
+
+
+
 
 module.exports = router;
 
