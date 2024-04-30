@@ -32,11 +32,13 @@ exports.sendingOTPMail = async (req, res) => {
   transporter.sendMail(mailOptions, function(error, info){
      if (error) {
        console.log(error);
+       res.status(500).json({ msg: "server error"});
      } else {
        console.log('Email sent: ' + info.response);
+          res.status(201).send({ msg: "otp send!",code: otp})
      }
     });
-     res.status(201).send({ msg: "otp send!",code: otp})
+     
     
     } catch (error) {
       console.error(error);
@@ -81,12 +83,14 @@ exports.sendWelcomeEmail = (req, res) => {
       transporter.sendMail(mailOptions, function(error, info){
         if (error) {
           console.log(error);
+            res.status(500).json({ msg: "server error"});
         } else {
           console.log('Email sent: ' + info.response);
+          res.status(201).json({ msg: "User signed in successfully", success: true});
         }
       });
       
-      res.status(201).json({ msg: "User signed in successfully", success: true});
+    
     }catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
