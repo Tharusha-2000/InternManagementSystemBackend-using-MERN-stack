@@ -9,7 +9,6 @@ exports.sendingOTPMail = async (req, res) => {
      
       var transporter = nodemailer.createTransport({
         service: 'gmail',
-        port: 534,
          auth: {
            user: process.env.Email,
            pass: process.env.Password
@@ -55,7 +54,6 @@ exports.sendWelcomeEmail = (req, res) => {
     var transporter = nodemailer.createTransport({
 
         service: 'gmail',
-        port: 534,
         auth: {
           user: process.env.Email,
           pass: process.env.Password
