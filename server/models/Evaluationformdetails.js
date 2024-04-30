@@ -4,7 +4,7 @@ const evaluationFormDetailsSchema = new mongoose.Schema({
     // Define your schema fields here
     user: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'intern', // Reference to the User model
+        ref: 'users', // Reference to the User model
         required: true
     },
     // Add more fields as needed

@@ -10,6 +10,7 @@ const TaskSchema = new mongoose.Schema({
     
     _userId: {
         type: mongoose.Types.ObjectId,
+        ref: 'users',
         required: true
     },
     isComplete: {
@@ -18,6 +19,10 @@ const TaskSchema = new mongoose.Schema({
     },
     mentorEmail:{
         type: String,
+    },
+    isVerified:{
+        type: Boolean,
+        default: false
     }
 
 
