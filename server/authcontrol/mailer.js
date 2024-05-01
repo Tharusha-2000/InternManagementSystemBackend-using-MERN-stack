@@ -34,10 +34,10 @@ exports.sendingOTPMail = async (req, res) => {
        console.log(error);
      } else {
        console.log('Email sent: ' + info.response);
+       res.status(201).send({ msg: "otp send!",code: otp})
+
      }
     });
-     res.status(201).send({ msg: "otp send!",code: otp})
-    
     } catch (error) {
       console.error(error);
       res.status(500).send({ error: "Internal Server Error" });
