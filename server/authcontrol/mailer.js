@@ -66,8 +66,8 @@ exports.sendWelcomeEmail = (req, res) => {
         subject: 'Sending Email using Node.js',
         html:  `
             <div style="background-color: #f9f9f9; padding: 20px; border-radius: 10px; font-family: Arial, sans-serif;">
-              <h1 style="color: blue; text-align: center;">Welcome to IMS</h1>
-              <p style="text-align: center; color: #333;">You have successfully registered to the IMS. Here are your details:</p>
+              <h1 style="color: blue; text-align: center;">Welcome to Zionlogy</h1>
+              <p style="text-align: center; color: #333;">You have successfully registered to the Zionlogy. Here are your details:</p>
               <div style="background-color: #fff; padding: 10px; border-radius: 10px; margin: 20px 0; color: #333;">
                 <p><strong>Email:</strong> ${email}</p>
                 <p><strong>Password:</strong> ${password}</p>
