@@ -597,20 +597,5 @@ exports.secure = async (req, res) => {
 
   /*......................................hansi.......................*/
 
-  exports.getIntern = async (req, res) => {
-    try {
-      if (req.data.role !== "intern") {
-        return res
-          .status(403)
-          .json({ msg: "You do not have permission to access this function" });
-      }
-      // Fetch all users with the role of "intern" from the database
-      const users = await User.find({ role: "intern" });
-      res.status(200).json({ success: true, users });
-    } catch (error) {
-      console.error(error);
-      res.status(500).send("Internal Server Error");
-    }
-  };
 
   /*......................................hansi.......................*/
