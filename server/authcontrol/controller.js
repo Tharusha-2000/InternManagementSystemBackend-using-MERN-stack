@@ -67,6 +67,9 @@ exports.generateOTP = async (req, res, next) => {
 
       // Store OTP in req.app.locals for later verification if needed
       req.app.locals.OTP = otp;
+      const otpTimeout = setTimeout(() => {
+        req.app.locals.OTP = null;
+      }, 1 * 60 * 1000);
 
       next();
     }
@@ -81,12 +84,7 @@ exports.generateOTP = async (req, res, next) => {
 exports.verifyOTP = async (req, res) => {
   const { code } = req.query;
 
-  const otpTimeout = setTimeout(() => {
-    req.app.locals.OTP = null;
-  }, 1 * 60 * 1000);
-
   if (parseInt(req.app.locals.OTP) === parseInt(code)) {
-    clearTimeout(otpTimeout);
     req.app.locals.OTP = null; // reset the OTP value
     req.app.locals.resetSession = true; // start session for reset password
     return res.status(201).send({ msg: "Verify Successsfully!" });
@@ -227,6 +225,8 @@ exports.register = async (req, res, next) => {
         .status(403)
         .json({ msg: "You do not have permission to access this function" });
     }
+
+
     const { fname, lname, dob, role, gender, email, password,jobtitle,employmentType,department} = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
