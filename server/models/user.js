@@ -94,9 +94,7 @@ const userSchema = mongoose.Schema(
     type: String,
     
   }
-
-
-    
+  
    },
   );
    userSchema.pre("save", async function () {
