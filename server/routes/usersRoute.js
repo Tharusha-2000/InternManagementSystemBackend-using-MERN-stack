@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
+
+
 const controller = require('../authcontrol/controller')
 const mailer = require('../authcontrol/mailer')
 const User = require("../models/user");
@@ -10,9 +12,6 @@ const Task = require("../models/task.js");
 // const ENV= require('../config.js');
 const middleware = require('../middleware/auth.js');
 
-const CVFiles = require("../models/Cvfiles.js");
-const { createCvfiles, deleteCvfile } = require("../controllers/cvfilescontroller.js");
-const { getCvfiles } = require("../controllers/cvfilescontroller.js");
 
 // var nodemailer = require('nodemailer');
 
@@ -29,13 +28,24 @@ router.put('/users/:id',middleware.Auth,controller.changeRole);
 router.post("/register",middleware.Auth,controller.register,mailer.sendWelcomeEmail);
 
 
+
+/*..........................................project task part................................................ */
+router.get('/task',middleware.Auth,controller.getTask);
+router.post('/task',middleware.Auth,controller.createTask);
+router.delete('/task/:id',middleware.Auth,controller.deleteTask);
+router.put('/task/:id',middleware.Auth,controller.updateTask);
+router.get('/taskNotify',middleware.Auth,controller.getTasklistMentorNotification);
+router.put('/taskVerify/:id',middleware.Auth,controller.getTaskVarify);
+router.get('/task/:id',middleware.Auth,controller.getTaskIntern);
+
 /*..........................................secure................................................. */
 router.put('/secure',middleware.Auth,controller.secure);
+/*..........................................create intren profile................................................ */
 
-
-
-
-
+router.get('/interns', middleware.Auth,controller.getInternList);
+router.get('/interns/:id', middleware.Auth,controller.getIntern);
+router.put('/interns/:id',middleware.Auth,controller.updatedIntern);
+router.put('/updateinterns',middleware.Auth,controller.updateinternprofile);
 
 /*..........................................profile create................................................. */
 
@@ -75,12 +85,6 @@ router.post('/uploadImage', middleware.Auth,upload.single('image'), async (req, 
       }
 
 });
-/*..........................................create intren profile................................................ */
-
-router.get('/interns', middleware.Auth,controller.getInternList);
-router.get('/interns/:id', middleware.Auth,controller.getIntern);
-router.put('/interns/:id',middleware.Auth,controller.updatedIntern);
-router.put('/updateinterns',middleware.Auth,controller.updateinternprofile);
 
 /*..........................................evaluvationpart................................................. */
 
@@ -91,77 +95,12 @@ router.put('/updateinterns',middleware.Auth,controller.updateinternprofile);
 
 
 
-/*..........................................project task part................................................ */
-router.get('/task',middleware.Auth,controller.getTask);
-router.post('/task',middleware.Auth,controller.createTask);
-router.delete('/task/:id',middleware.Auth,controller.deleteTask);
-router.put('/task/:id',middleware.Auth,controller.updateTask,middleware.localVariables,mailer.sendingVerifyTaskMail);
-
-
-
-
-
-
-
-
-
-
-
-
-/*..........................................cvupload................................................. */
-
-
-// upload cv files URL
-router.post("/api/cvfiles", middleware.Auth, async (req, res) => {
-  try {
-    await createCvfiles(req, res);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ msg: "Internal Server Error" });
-  }
-});
-
-// View cv file URL
-router.get("/api/cvfiles/:userId", middleware.Auth, getCvfiles);
-
-// Delete cv file URL
-router.delete("/api/cvfiles/:userId", middleware.Auth, deleteCvfile);
-
-
-
-
 
 
 
 
 
 module.exports = router;
-
-
-
- 
-
-
-
-
-// /* GET: http://localhost:8000/api/users/user/dinu */
-// router.get("/user/:username", async (req, res) => {
-//         const { username } = req.params;
-//   try {
-//       if (!username) return res.status(501).send({ error: "Invalid Username" });
-//         const user = await User.findOne({ username });
-
-//       if (!user) return res.status(501).send({ error: "Couldn't Find the User" });
-//       //romove hash password
-//         const {password,...rest} = Object.assign({}, user.toJSON());
-//         return res.status(201).send(rest);
-
-//       }catch(error){
-//           return res.status(404).send({ error: "Cannot Find User Data" });
-//       }
-//       });
-
-
 
 
 

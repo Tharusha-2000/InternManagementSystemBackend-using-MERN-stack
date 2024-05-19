@@ -1,17 +1,28 @@
-const ENV= require('../config.js');
 const  mongoose  = require("mongoose");
-require("dotenv").config();
-var mongoURL = ENV.DBUrl;
-const User = require('../models/user.js'); // Use uppercase for model names
-const Intern = require('../models/intern.js'); 
-mongoose.connect(process.env.MONGODB_URI || mongoURL)
-    .then(() => {
+var mongoURL = process.env.DBUrl;
+// mongoose.connect(process.env.MONGODB_URI || mongoURL)
+//     .then(() => {
 
-        console.log('MongoDB Connection Successful');
-      })
-      .catch((error) => {
-        console.error('MongoDB Connection Failed:', error);
-      });
+//         console.log('MongoDB Connection Successful');
+//       })
+//       .catch((error) => {
+//         console.error('MongoDB Connection Failed:', error);
+//       });
   
-
-module.exports = mongoose;
+      const connectDB = async() => {
+        try {
+           mongoose.set("strictQuery", false);
+            await mongoose.connect(mongoURL,{
+               useUnifiedTopology: true,
+               useNewUrlParser: true,
+            })
+            console.log('mongodb connection SUCCESS');
+        } catch (error) {
+            console.log('mongodb connection FAIL');
+            console.log(error);
+            process.exit(1);
+        }
+   
+   }
+   
+   module.exports = connectDB;
