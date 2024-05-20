@@ -225,14 +225,11 @@ exports.register = async (req, res, next) => {
         .status(403)
         .json({ msg: "You do not have permission to access this function" });
     }
-
-
     const { fname, lname, dob, role, gender, email, password,jobtitle,employmentType,department} = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.json({ msg: "User already exists" });
     }
-
     const user = await User.create({
       fname,
       lname,
@@ -245,7 +242,7 @@ exports.register = async (req, res, next) => {
       employmentType,
       department,
     });
-    //console.log(req.data.gender);
+
     console.log(req.data); 
 
     res.locals.userData = { email, password };
@@ -298,7 +295,7 @@ exports.updateuser=async (req, res) => {
 
     const { id } = req.data;
     console.log(req.body);
-    console.log("hi");
+    
         try {
           const updateduser = await User.findByIdAndUpdate(id, req.body, { new: true });
           if (!updateduser) {
@@ -563,16 +560,7 @@ exports.getTaskIntern=async (req, res)=> {
   });
 };
 
-
-
-
-
-
-
-
-
-/*......................................sanugi.......................*/
-
+//secure password
 exports.secure = async (req, res) => {
   const { id } = req.data;
   const { Oldpassword, Newpassword } = req.body;
@@ -605,9 +593,63 @@ exports.secure = async (req, res) => {
   }
 };
 
-/*......................................sanugi.......................*/
+/*......................................cv upload.......................*/
 
- 
+   //upload cv user
+   exports.uploadcvByAdmin=async (req, res) => {
+    // hansi oya haduvata passe meke admin vithane hadanne
+    // const { role } = req.data;
+    // if (role !== "admin") {
+    //   return res.status(403).json({ error: "You are not allowed to access this function" });
+    // } 
+    // const { id } = req.params;
+    //meka tike add keranne
+
+    const { id } = req.data;
+    console.log(req.body);
+        try {
+          const updateduser = await User.findByIdAndUpdate(id, req.body, { new: true });
+          if (!updateduser) {
+            return res.status(404).json({ message: ' user not found' });
+          }
+          res.json({msg:"update successfully", updateduser});
+          
+        } catch (error) {
+          res.status(500).json({ msg: "Internal Server Error" });
+        }
+  
+  };
+
+  exports.deletecvByAdmin=async (req, res) => {
+    // hansi oya haduvata passe meke admin vithane hadanne
+    // const { role } = req.data;
+    // if (role !== "admin") {
+    //   return res.status(403).json({ error: "You are not allowed to access this function" });
+    // } 
+    // const { id } = req.params;
+    //meka tike add keranne
+
+    const { id } = req.data;
+    console.log(hi);
+    console.log(req.body);
+        try {
+          const user = await User.findById(id);
+          if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+          }
+          if (user.cvurl === null) {
+          return res.json({ msg: "CV URL is null", user });
+         }
+          user.cvurl = null;
+          await user.save();
+          res.json({ msg: "CV URL deleted", user });
+        } catch (error) {
+          res.status(500).json({ msg: "Internal Server Error" });
+        }
+  
+  };
+
+
 /*......................................dilum.......................*/
 
 
