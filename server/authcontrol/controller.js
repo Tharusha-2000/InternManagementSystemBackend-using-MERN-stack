@@ -293,6 +293,25 @@ exports.updateuser=async (req, res) => {
     }
   };
 
+  //upload photo user
+  exports.uploadImageByuser=async (req, res) => {
+
+    const { id } = req.data;
+    console.log(req.body);
+    console.log("hi");
+        try {
+          const updateduser = await User.findByIdAndUpdate(id, req.body, { new: true });
+          if (!updateduser) {
+            return res.status(404).json({ message: ' user not found' });
+          }
+          res.json({msg:"update successfully", updateduser});
+          
+        } catch (error) {
+          res.status(500).json({ msg: "Internal Server Error" });
+        }
+  
+  };
+
   /*......................................intern table create.......................*/
 // Read Intern Users
 exports.getInternList = async (req, res) => {
