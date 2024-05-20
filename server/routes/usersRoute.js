@@ -71,6 +71,7 @@ router.put('/uploadImage',middleware.Auth,controller.uploadImageByuser);
 module.exports = router;
 
 
+
 /*......................................sanugi.......................*/
 
 

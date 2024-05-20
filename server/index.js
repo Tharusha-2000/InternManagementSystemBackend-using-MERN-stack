@@ -14,11 +14,10 @@ const connectDB = require('./utils/db.js');
 connectDB();
 
 app.use(cors({
-    origin: ["http://localhost:5173"],
-    methods: ['GET', 'POST', 'PUT', "DELETE"],
+    origin: ["https://imsfrontend.vercel.app"],
+    methods: ['GET','POST','PUT',"DELETE"],
     credentials: true
- }))
-
+}))
 app.set('view engine', 'ejs');
 app.use(morgan('tiny'));
 app.use(express.json());
@@ -26,12 +25,16 @@ app.use(cookieParser());
 
 
 app.use("/api/users", userRoute);
+
 app.use(express.static('Public'))
 app.use(body.json());
 
 app.listen(8000, () => {
       console.log("Server is running")
  })
+
+   
+
 
 
 
