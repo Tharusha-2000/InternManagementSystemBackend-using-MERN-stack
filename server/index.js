@@ -14,7 +14,7 @@ const connectDB = require('./utils/db.js');
 connectDB();
 
 app.use(cors({
-    origin: ["https://imsfrontend.vercel.app"],
+    origin: ["http://localhost:5173"],
     methods: ['GET','POST','PUT',"DELETE"],
     credentials: true
 }))
@@ -32,10 +32,3 @@ app.use(body.json());
 app.listen(8000, () => {
       console.log("Server is running")
  })
-
-   
-
-
-
-
-
