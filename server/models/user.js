@@ -50,12 +50,15 @@ const userSchema = mongoose.Schema(
       type: String,
       required:false,
     },
-    image: {
+    imageUrl: {
       type: String,
       required: false,
     },
-
-
+    cvUrl :{
+      type: String,
+      required: false,
+    },
+ 
   university: {
     type: String,
    // required: true
