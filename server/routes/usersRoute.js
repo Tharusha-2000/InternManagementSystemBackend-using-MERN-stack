@@ -124,6 +124,10 @@ router.post('/setDefaultEformstates', setDefaultEformstates);
 const { storeMentorScoresById } = require('../authcontrol/controller');
 router.post('/storeMentorScores/:id', storeMentorScoresById);
 
+
+//tempory route for deleting data which is filled by mentor 
+const{deleteInfoByIdTem}=require('../authcontrol/controller');
+router.delete('/deleteInfoByIdTem/:id',deleteInfoByIdTem);
 //routes for evaluators section
 //get all the interns by evaluator
 const{getInternsByEvaluator} = require('../authcontrol/controller');
