@@ -946,6 +946,37 @@ exports.deleteeformData = async (req, res) => {
     }
 };
 
+//tempory code to delete metor filled details
+
+exports.deleteInfoByIdTem = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const evaluationFormDetails = await EvaluationFormDetails.findById(id);
+
+    if (!evaluationFormDetails) {
+      return res.status(404).json({ message: 'No evaluation form details found with this id' });
+    }
+
+    evaluationFormDetails.job_performance_scores_evaluator = [];
+    evaluationFormDetails.core_values_scores_evaluator = [];
+    evaluationFormDetails.job_performance_scores_mentor = [];
+    evaluationFormDetails.core_values_scores_mentor = [];
+    evaluationFormDetails.overall_performance_mentor = null;
+    
+    evaluationFormDetails.action_taken_mentor = null;
+    evaluationFormDetails.comment_evaluator = null;
+    evaluationFormDetails.comment_mentor = null;
+    evaluationFormDetails.date = null;
+
+    await evaluationFormDetails.save();
+
+    res.json({ message: 'Fields reset successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
 //evaluator backend apis
 
 
