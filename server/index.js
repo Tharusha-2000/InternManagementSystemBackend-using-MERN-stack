@@ -12,7 +12,7 @@ const body=require('body-parser');
 const app = express() 
 
 app.use(cors({
-    origin: ["https://imsfrontend.vercel.app"],
+    origin: ["http://localhost:5173"],
     methods: ['GET','POST','PUT',"DELETE"],
     credentials: true
 }))
