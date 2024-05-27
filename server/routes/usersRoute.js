@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 
+
 const controller = require('../authcontrol/controller')
 const mailer = require('../authcontrol/mailer')
 const User = require("../models/user");
@@ -50,41 +51,14 @@ router.put('/updateinterns',middleware.Auth,controller.updateinternprofile);
 
 router.get('/user',middleware.Auth,controller.getUser);
 router.put("/updateuser",middleware.Auth,controller.updateuser);
-
-//router.put('/uploadImage',middleware.Auth,controller.uploadImage);
-
-const multer = require("multer");
-
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, 'uploads/')
-  },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now();
-    cb(null, uniqueSuffix + '-' +file.originalname );
-  }
-})
+router.put('/uploadImage',middleware.Auth,controller.uploadImageByuser);
 
 
-const upload = multer({ storage: storage })
 
-router.post('/uploadImage', middleware.Auth,upload.single('image'), async (req, res) => {
-  const { id } = req.data;
-  console.log("hi");
-      try {
-        const user = await User.findById(id);
-        if (!user) {
-          return res.status(404).json({ msg: "User not found" });
-        }
-        user.image = req.file.path;
-        await user.save();
-        res.json({ msg: "Image uploaded successfully",imageUrl: user.image });
-      } catch (error) {
-        res.status(500).json({ msg: "Internal Server Error" });
-      }
 
-});
-
+/*..........................................cv part................................................. */
+router.put('/uploadcv',middleware.Auth,controller.uploadcvByAdmin);
+router.put('/deletecv',middleware.Auth,controller.deletecvByAdmin);
 /*..........................................evaluvationpart................................................. */
 
 
@@ -111,11 +85,53 @@ module.exports = router;
 
 /*......................................hansi.......................*/
 
+
 /*......................................dilum.......................*/
 
+//router.get("/interns",controller.getInterns);
+const {getEvInterns} = require('../authcontrol/controller');
+router.get('/Evinterns', getEvInterns);
+
+
+//router to get evaluators
+router.get('/evaluators', middleware.Auth, controller.getEvaluators);
+//rout to post evaluator name into evaluationformdetails collection
+const {postEvaluatorName} = require('../authcontrol/controller');
+router.post('/evaluatorname', postEvaluatorName);
+
+//router to delete evaluationform details
+const {deleteeformData} = require('../authcontrol/controller');
+router.delete('/deleteeformData', deleteeformData);
 
 
 
+
+
+//mentor pages routes
+const{checkMentor} = require('../authcontrol/controller');
+router.get('/checkMentor/:userId', checkMentor);
+
+//get critirias for mentor
+const {getCriteriaById} = require('../authcontrol/controller');
+router.get('/getCriteriaById/:id', getCriteriaById);
+
+
+//tempory routing for adding remaining feilds in collection
+const {setDefaultEformstates} = require('../authcontrol/controller');
+router.post('/setDefaultEformstates', setDefaultEformstates);
+
+//routes for store mentor scores of evaluation forms
+const { storeMentorScoresById } = require('../authcontrol/controller');
+router.post('/storeMentorScores/:id', storeMentorScoresById);
+
+
+//tempory route for deleting data which is filled by mentor 
+const{deleteInfoByIdTem}=require('../authcontrol/controller');
+router.delete('/deleteInfoByIdTem/:id',deleteInfoByIdTem);
+//routes for evaluators section
+//get all the interns by evaluator
+const{getInternsByEvaluator} = require('../authcontrol/controller');
+router.get('/getInternsByEvaluator/:id',getInternsByEvaluator);
 /*......................................dilum.......................*/
 
 

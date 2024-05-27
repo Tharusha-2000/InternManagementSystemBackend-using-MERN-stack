@@ -4,15 +4,17 @@ const cors = require("cors");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
 const morgan = require("morgan");
-const dbconfig = require("./utils/db.js");
-
-
+const Evaluationformdetails = require('./models/Evaluationformdetails.js');
 const userRoute = require("./routes/usersRoute.js");
+
 const body=require('body-parser');
 const app = express() 
 
+const connectDB = require('./utils/db.js');
+connectDB();
+
 app.use(cors({
-    origin: ["https://imsfrontend.vercel.app"],
+    origin: ["http://localhost:5173"],
     methods: ['GET','POST','PUT',"DELETE"],
     credentials: true
 }))
@@ -22,18 +24,16 @@ app.use(express.json());
 app.use(cookieParser());
 
 
-
-
 app.use("/api/users", userRoute);
 
 app.use(express.static('Public'))
 app.use(body.json());
 
-app.listen(8000, () => {
+app.listen(8900, () => {
       console.log("Server is running")
+ })
 
-      
-    })
+   
 
 
 
