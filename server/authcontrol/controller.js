@@ -651,6 +651,390 @@ exports.secure = async (req, res) => {
 
 
 /*......................................dilum.......................*/
+exports.getEvInterns = async (req, res) => {
+  try {
+    const users = await User.find({ role: 'intern' }).lean();
 
+    const promises = users.map(async user => {
+      let evaluationFormDetails = await EvaluationFormDetails.findOne({ user: user._id }).lean();
+
+      // If there's no EvaluationFormDetails document for this user, create one
+      if (!evaluationFormDetails) {
+        evaluationFormDetails = new EvaluationFormDetails({
+          user: user._id, // Set the user field to the id of the user
+          evaluator: ' ',
+          overall_performance_mentor: 0,
+          overall_performance_evaluator: 0,
+          action_taken_mentor: ' ',
+          comment_mentor: ' ',
+          comment_evaluator: ' ',
+          evaluate_before: new Date(),
+          // Set other fields as needed
+        });
+
+        // Save the EvaluationFormDetails document
+        await evaluationFormDetails.save();
+      }
+
+      return {
+        name: user.fname + ' ' + user.lname,
+        mentor: user.mentor,
+        eformStatus: evaluationFormDetails ? evaluationFormDetails.eformstates : null,
+        evaluationFormDetailsId: evaluationFormDetails ? evaluationFormDetails._id : null // Add the ObjectId of the EvaluationFormDetails document
+      };
+    });
+
+    const userDetails = await Promise.all(promises);
+
+    // Get the ids of all interns
+    const internIds = users.map(user => user._id);
+
+    // Remove EvaluationFormDetails documents that don't have a corresponding intern
+    await EvaluationFormDetails.deleteMany({ user: { $nin: internIds } });
+
+    res.json(userDetails);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+//get all the evaluators for evaluation form dropdown
+exports.getEvaluators = async (req, res) => {
+  try {
+    if (req.data.role === "intern") {
+      return res
+        .status(403)
+        .json({ msg: "You do not have permission to access this function" });
+    }
+
+// Find all users where role is 'evaluator' or 'evaluator ' and only return the fname and lname fields
+const evaluators = await User.find({ role: { $in: ['evaluator', 'evaluator '] } }, 'fname lname').lean();
+
+    // Map over the evaluators and combine the fname and lname fields into a single name field
+    const evaluatorNames = evaluators.map(evaluator => evaluator.fname + ' ' + evaluator.lname);
+
+    // Send the evaluator names in the response
+    res.json(evaluatorNames);
+  } catch (err) {
+    // Send an error response if something goes wrong
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+
+//post evalutor name into evaluation form details collection
+exports.postEvaluatorName = async (req, res) => {
+  try {
+    const { id, evaluatorName, jobPerformanceCriteriasEvaluator, coreValuesCriteriasEvaluator, jobPerformanceCriteriasMentor, coreValuesCriteriasMentor, evaluateBefore } = req.body;
+  
+    // Check if all the fields are filled
+    const allFieldsFilled = evaluatorName && jobPerformanceCriteriasEvaluator && coreValuesCriteriasEvaluator && jobPerformanceCriteriasMentor && coreValuesCriteriasMentor && evaluateBefore;
+
+    // Log evaluateBefore
+    console.log('evaluateBefore:', evaluateBefore);
+
+    // Log the request body
+    console.log('Request body:', req.body);
+  
+    // Find the EvaluationFormDetails document with the given ObjectId and update it
+    const updatedDocument = await EvaluationFormDetails.findByIdAndUpdate(id, 
+      { 
+        evaluator: evaluatorName, 
+        job_performance_criterias_evaluator: jobPerformanceCriteriasEvaluator,
+        core_values_criterias_evaluator: coreValuesCriteriasEvaluator,
+        job_performance_criterias_mentor: jobPerformanceCriteriasMentor,
+        core_values_criterias_mentor: coreValuesCriteriasMentor,
+        evaluate_before: evaluateBefore ? new Date(evaluateBefore) : undefined,
+        eformstates: allFieldsFilled ? 'created' : 'not created'
+      }, 
+      { new: true }).lean();
+  
+    // Send the updated document in the response
+    res.json(updatedDocument);
+  } catch (err) {
+    // Log the error details
+    console.error('Error details:', err);
+  
+    // Send an error response if something goes wrong
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+// Delete all the data from the specified fields
+exports.deleteeformData = async (req, res) => {
+  try {
+    const { id } = req.body;
+
+    // Find the EvaluationFormDetails document with the given ObjectId and update it
+    const updatedDocument = await EvaluationFormDetails.findByIdAndUpdate(id, 
+      { 
+        evaluator: '', // Set evaluator to its default value
+        job_performance_criterias_evaluator: [], // Set job_performance_criterias_evaluator to its default value
+        core_values_criterias_evaluator: [], // Set core_values_criterias_evaluator to its default value
+        job_performance_criterias_mentor: [], // Set job_performance_criterias_mentor to its default value
+        core_values_criterias_mentor: [], // Set core_values_criterias_mentor to its default value
+        evaluate_before: null, // Set evaluate_before to its default value
+        eformstates: 'not created' // Set eformstates to 'not created'
+      }, 
+      { new: true }).lean();
+  
+    // Send the updated document in the response
+    res.json(updatedDocument);
+  } catch (err) {
+    // Log the error details
+    console.error('Error details:', err);
+  
+    // Send an error response if something goes wrong
+    res.status(500).json({ error: err.message });
+  }
+};
+
+
+
+
+
+
+
+
+
+
+  /*......................................mmentors page apis.......................*/
+
+  exports.checkMentor = async (req, res) => {
+    try {
+      // Get the logged-in user's id from the request parameters
+      const userId = req.params.userId;
+  
+      // Find the User document with the given id
+      const user = await User.findById(userId).lean();
+  
+      // Get the full name of the logged-in user
+      const fullName = user.fname + ' ' + user.lname;
+  
+      // Find all User documents where mentor is the logged-in user
+      const users = await User.find({ mentor: fullName }).lean();
+  
+      // For each user, find the related Evaluationformdetails document where eformstates is 'created'
+      const mentorDetails = [];
+      for (let user of users) {
+        const evaluationFormDetails = await EvaluationFormDetails.find({ eformstates: 'created', user: user._id }).lean();
+        for (let doc of evaluationFormDetails) {
+          const isMentorFormFilled = (
+            doc.job_performance_scores_mentor.length > 0 &&
+            doc.core_values_scores_mentor.length > 0 &&
+            doc.overall_performance_mentor > 0 &&
+            doc.action_taken_mentor !== '' &&
+            doc.comment_mentor !== ''
+          );
+          mentorDetails.push({
+            internName: user.fname + ' ' + user.lname,
+            evaluateBefore: doc.evaluate_before,
+            eformstates: doc.eformstates,
+            jobPerformanceCriteriasEvaluator: doc.job_performance_criterias_evaluator,
+            coreValuesCriteriasEvaluator: doc.core_values_criterias_evaluator,
+            jobPerformanceCriteriasMentor: doc.job_performance_criterias_mentor,
+            coreValuesCriteriasMentor: doc.core_values_criterias_mentor,
+            evaluator: doc.evaluator,
+            internId: doc._id,
+            isMentorFormFilled: isMentorFormFilled
+          });
+        }
+      }
+  
+      // Send the result in the response
+      res.json(mentorDetails);
+    } catch (err) {
+      // Log the error details
+      console.error('Error details:', err);
+  
+      // Send an error response if something goes wrong
+      res.status(500).json({ error: err.message });
+    }
+};
+
+  
+  exports.getCriteriaById = async (req, res) => {
+    try {
+      // Get the ID from the request parameters
+      const id = req.params.id;
+  
+      // Find the EvaluationFormDetails document with the provided ID and only return the job_performance_criterias_mentor and core_values_criterias_mentor fields
+      const evaluationFormDetails = await EvaluationFormDetails.findById(id, 'job_performance_criterias_mentor core_values_criterias_mentor').lean();
+  
+      // Send the result in the response
+      res.json(evaluationFormDetails);
+    } catch (err) {
+      // Log the error details
+      console.error('Error details:', err);
+  
+      // Send an error response if something goes wrong
+      res.status(500).json({ error: err.message });
+    }
+  };
+
+
+  // tempory code for add remaining fields to evaluationformdetails collection
+  exports.setDefaultEformstates = async (req, res) => {
+    try {
+      // Define the new fields to add
+      const newFields = {
+        job_performance_scores_evaluator: [],
+        core_values_scores_evaluator: [],
+        job_performance_scores_mentor: [],
+        core_values_scores_mentor: [],
+        overall_performance_mentor: 0,
+        overall_performance_evaluator: 0,
+        action_taken_mentor: '',
+        comment_mentor: '',
+        comment_evaluator: '',
+       
+      };
+  
+      // Update all documents in the EvaluationFormDetails collection
+      const updatedDocuments = await EvaluationFormDetails.updateMany({}, 
+        { 
+          $set: newFields
+        });
+  
+      // Send the number of updated documents in the response
+      res.json({ updatedCount: updatedDocuments.nModified });
+    } catch (err) {
+      // Log the error details
+      console.error('Error details:', err);
+  
+      // Send an error response if something goes wrong
+      res.status(500).json({ error: err.message });
+    }
+  }; 
+
+  //this api to store mentor submiting details.
+
+  exports.storeMentorScoresById = async (req, res) => {
+    const { 
+      coreValuesScoresMentor, 
+      jobPerformanceScoresMentor, 
+      overall_performance_mentor = null, 
+      action_taken_mentor = null, 
+      comment_mentor = null 
+  } = req.body;
+    const { id } = req.params; // Get the ID from the URL parameters
+  
+    try {
+      // Find the document for the intern
+      let evaluationFormDetails = await EvaluationFormDetails.findById(id);
+  
+      // If the document doesn't exist, return an error
+      if (!evaluationFormDetails) {
+        return res.status(404).json({ message: 'No evaluation form found for this intern' });
+      }
+  
+      // Update the scores
+      evaluationFormDetails.core_values_scores_mentor = coreValuesScoresMentor;
+      evaluationFormDetails.job_performance_scores_mentor = jobPerformanceScoresMentor;
+      evaluationFormDetails.overall_performance_mentor = overall_performance_mentor;
+      evaluationFormDetails.action_taken_mentor = action_taken_mentor;
+      evaluationFormDetails.comment_mentor = comment_mentor;
+  
+      // Save the document
+      await evaluationFormDetails.save();
+  
+      res.json({ message: 'Scores stored successfully' });
+    } catch (err) {
+      console.error(err.message);
+      res.status(500).send(`Server error: ${err.message}`);
+    }
+};
+
+//tempory code to delete metor filled details
+
+exports.deleteInfoByIdTem = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const evaluationFormDetails = await EvaluationFormDetails.findById(id);
+
+    if (!evaluationFormDetails) {
+      return res.status(404).json({ message: 'No evaluation form details found with this id' });
+    }
+
+    evaluationFormDetails.job_performance_scores_evaluator = [];
+    evaluationFormDetails.core_values_scores_evaluator = [];
+    evaluationFormDetails.job_performance_scores_mentor = [];
+    evaluationFormDetails.core_values_scores_mentor = [];
+    evaluationFormDetails.overall_performance_mentor = null;
+    
+    evaluationFormDetails.action_taken_mentor = null;
+    evaluationFormDetails.comment_evaluator = null;
+    evaluationFormDetails.comment_mentor = null;
+    evaluationFormDetails.date = null;
+
+    await evaluationFormDetails.save();
+
+    res.json({ message: 'Fields reset successfully' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+
+//evaluator backend apis
+
+
+exports.getInternsByEvaluator = async (req, res) => {
+  try {
+    // Get the user's id from the request parameters
+    const id = req.params.id;
+
+    // Find the User document with the given id
+    const evaluator = await User.findById(id).lean();
+
+    // Check if the user exists
+    if (!evaluator) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Check if the user is an evaluator
+    if (evaluator.role !== 'evaluator') {
+      return res.status(403).json({ error: 'User is not an evaluator' });
+    }
+
+    // Get the full name of the evaluator
+    const evaluatorName = evaluator.fname + ' ' + evaluator.lname;
+
+    // Find all EvaluationFormDetails documents where evaluator is the evaluator's name
+    const evaluationFormDetails = await EvaluationFormDetails.find({ evaluator: evaluatorName }).lean();
+
+    // Get the ids of the users (interns) from the EvaluationFormDetails documents
+    const userIds = evaluationFormDetails.map(doc => doc.user);
+
+    // Find all User documents with the ids from the EvaluationFormDetails documents
+    const users = await User.find({ _id: { $in: userIds } }).lean();
+
+    // Get the full names of the users (interns) and their evaluate_before dates
+    const internDetails = users.map(user => {
+      const userFormDetails = evaluationFormDetails.find(doc => doc.user.toString() === user._id.toString());
+      return {
+        name: user.fname + ' ' + user.lname,
+        evaluate_before: userFormDetails ? userFormDetails.evaluate_before : null
+      };
+    });
+
+    // Send the result in the response
+    res.json(internDetails);
+  } catch (err) {
+    // Log the error details
+    console.error('Error details:', err);
+
+    // Send an error response if something goes wrong
+    res.status(500).json({ error: err.message });
+  }
+};
 
   /*......................................dilum.......................*/
+
+
+
+  /*......................................hansi.......................*/
+
+
+  /*......................................hansi.......................*/

@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 
+
 const controller = require('../authcontrol/controller')
 const mailer = require('../authcontrol/mailer')
 const User = require("../models/user");
@@ -84,11 +85,53 @@ module.exports = router;
 
 /*......................................hansi.......................*/
 
+
 /*......................................dilum.......................*/
 
+//router.get("/interns",controller.getInterns);
+const {getEvInterns} = require('../authcontrol/controller');
+router.get('/Evinterns', getEvInterns);
+
+
+//router to get evaluators
+router.get('/evaluators', middleware.Auth, controller.getEvaluators);
+//rout to post evaluator name into evaluationformdetails collection
+const {postEvaluatorName} = require('../authcontrol/controller');
+router.post('/evaluatorname', postEvaluatorName);
+
+//router to delete evaluationform details
+const {deleteeformData} = require('../authcontrol/controller');
+router.delete('/deleteeformData', deleteeformData);
 
 
 
+
+
+//mentor pages routes
+const{checkMentor} = require('../authcontrol/controller');
+router.get('/checkMentor/:userId', checkMentor);
+
+//get critirias for mentor
+const {getCriteriaById} = require('../authcontrol/controller');
+router.get('/getCriteriaById/:id', getCriteriaById);
+
+
+//tempory routing for adding remaining feilds in collection
+const {setDefaultEformstates} = require('../authcontrol/controller');
+router.post('/setDefaultEformstates', setDefaultEformstates);
+
+//routes for store mentor scores of evaluation forms
+const { storeMentorScoresById } = require('../authcontrol/controller');
+router.post('/storeMentorScores/:id', storeMentorScoresById);
+
+
+//tempory route for deleting data which is filled by mentor 
+const{deleteInfoByIdTem}=require('../authcontrol/controller');
+router.delete('/deleteInfoByIdTem/:id',deleteInfoByIdTem);
+//routes for evaluators section
+//get all the interns by evaluator
+const{getInternsByEvaluator} = require('../authcontrol/controller');
+router.get('/getInternsByEvaluator/:id',getInternsByEvaluator);
 /*......................................dilum.......................*/
 
 
