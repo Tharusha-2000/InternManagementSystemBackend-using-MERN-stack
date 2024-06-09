@@ -67,6 +67,14 @@ const evaluationFormDetailsSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
+  evaluated_date_Evaluator: {
+    type: Date,
+    required: false,
+  },
+  evaluated_date_Mentor: {
+    type: Date,
+    required: false,
+  },
 });
 
 const Evaluationformdetails = mongoose.model(
