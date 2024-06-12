@@ -653,6 +653,13 @@ exports.secure = async (req, res) => {
 /*......................................dilum.......................*/
 exports.getEvInterns = async (req, res) => {
   try {
+    // Check if the user's role is not 'admin'
+    if (req.data.role !== "admin") {
+      return res
+        .status(403)
+        .json({ msg: "You do not have permission to access this function" });
+    }
+
     const users = await User.find({ role: 'intern' }).lean();
 
     const promises = users.map(async user => {
@@ -697,7 +704,6 @@ exports.getEvInterns = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 //get all the evaluators for evaluation form dropdown
 exports.getEvaluators = async (req, res) => {
   try {
