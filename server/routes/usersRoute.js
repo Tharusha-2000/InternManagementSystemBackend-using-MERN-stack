@@ -130,6 +130,14 @@ router.delete('/deleteInfoByIdTem/:id',deleteInfoByIdTem);
 //get all the interns by evaluator
 const{getInternsByEvaluator} = require('../authcontrol/controller');
 router.get('/getInternsByEvaluator/:id',getInternsByEvaluator);
+
+//post evaluator evaluation results by id
+const{postEvaluatorResultById} = require('../authcontrol/controller');
+router.post('/postEvaluatorResultById/:id',postEvaluatorResultById);
+
+//manager page routes
+const{getInternsForManager} = require('../authcontrol/controller');
+router.get('/getInternsForManager',getInternsForManager);
 /*......................................dilum.......................*/
 
 

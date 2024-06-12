@@ -697,6 +697,7 @@ exports.getEvInterns = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 //get all the evaluators for evaluation form dropdown
 exports.getEvaluators = async (req, res) => {
   try {
@@ -917,7 +918,7 @@ exports.deleteeformData = async (req, res) => {
       overall_performance_mentor = null, 
       action_taken_mentor = null, 
       comment_mentor = null 
-  } = req.body;
+    } = req.body;
     const { id } = req.params; // Get the ID from the URL parameters
   
     try {
@@ -936,6 +937,9 @@ exports.deleteeformData = async (req, res) => {
       evaluationFormDetails.action_taken_mentor = action_taken_mentor;
       evaluationFormDetails.comment_mentor = comment_mentor;
   
+      // Store the current date as the evaluated_date_Mentor
+      evaluationFormDetails.evaluated_date_Mentor = new Date();
+  
       // Save the document
       await evaluationFormDetails.save();
   
@@ -944,7 +948,7 @@ exports.deleteeformData = async (req, res) => {
       console.error(err.message);
       res.status(500).send(`Server error: ${err.message}`);
     }
-};
+  };
 
 //tempory code to delete metor filled details
 
@@ -1010,12 +1014,27 @@ exports.getInternsByEvaluator = async (req, res) => {
     // Find all User documents with the ids from the EvaluationFormDetails documents
     const users = await User.find({ _id: { $in: userIds } }).lean();
 
-    // Get the full names of the users (interns) and their evaluate_before dates
+    // Get the full names of the users (interns), their evaluate_before dates, job_performance_criterias_evaluator, core_values_criterias_evaluator, their ids and the _id from the EvaluationFormDetails document
     const internDetails = users.map(user => {
       const userFormDetails = evaluationFormDetails.find(doc => doc.user.toString() === user._id.toString());
+
+      // Check if all the fields are filled
+      const isEvaluated = userFormDetails &&
+        Array.isArray(userFormDetails.job_performance_scores_evaluator) &&
+        userFormDetails.job_performance_scores_evaluator.length > 0 &&
+        Array.isArray(userFormDetails.core_values_scores_evaluator) &&
+        userFormDetails.core_values_scores_evaluator.length > 0 &&
+        typeof userFormDetails.overall_performance_evaluator === 'number' &&
+        typeof userFormDetails.comment_evaluator === 'string';
+
       return {
+        id: user._id,
         name: user.fname + ' ' + user.lname,
-        evaluate_before: userFormDetails ? userFormDetails.evaluate_before : null
+        evaluate_before: userFormDetails ? userFormDetails.evaluate_before : null,
+        job_performance_criterias_evaluator: userFormDetails ? userFormDetails.job_performance_criterias_evaluator : null,
+        core_values_criterias_evaluator: userFormDetails ? userFormDetails.core_values_criterias_evaluator : null,
+        evaluationFormDetailsId: userFormDetails ? userFormDetails._id : null,
+        isEvaluated: isEvaluated,
       };
     });
 
@@ -1030,6 +1049,90 @@ exports.getInternsByEvaluator = async (req, res) => {
   }
 };
 
+exports.postEvaluatorResultById = async (req, res) => {
+  try {
+    const id = req.params.id; // Intern's ID
+
+    // Find the EvaluationFormDetails document with the given id
+    const evaluationFormDetails = await EvaluationFormDetails.findById(id).lean();
+
+    // Check if the EvaluationFormDetails exists
+    if (!evaluationFormDetails) {
+        return res.status(404).json({ error: 'Evaluation form not found' });
+    }
+
+    // Update the EvaluationFormDetails document with the evaluator's results
+    const updatedFormDetails = await EvaluationFormDetails.findByIdAndUpdate(
+        id,
+        {
+            job_performance_scores_evaluator: req.body.job_performance_scores_evaluator,
+            core_values_scores_evaluator: req.body.core_values_scores_evaluator,
+            overall_performance_evaluator: req.body.overall_performance_evaluator,
+            comment_evaluator: req.body.comment_evaluator,
+            evaluated_date_Evaluator: new Date() // Store the current date
+        },
+        { new: true }
+    );
+
+    // Send the updated EvaluationFormDetails document in the response
+    res.json(updatedFormDetails);
+  } catch (err) {
+    // Log the error details
+    console.error('Error details:', err);
+    res.status(500).json({ error: 'An error occurred while updating the evaluation form' });
+  }
+};
+//manager part of the code
+
+exports.getInternsForManager = async (req, res) => {
+  try {
+    // Find all User documents where role is 'intern'
+    const interns = await User.find({ role: 'intern' }).lean();
+
+    // For each intern, find the corresponding EvaluationFormDetails document
+    const internsWithDetails = await Promise.all(interns.map(async (intern) => {
+      const evaluationFormDetails = await EvaluationFormDetails.findOne({ user: intern._id }).lean();
+
+      // Check if the specified fields are filled
+      const fields = [
+        'job_performance_criterias_evaluator',
+        'core_values_criterias_evaluator',
+        'job_performance_criterias_mentor',
+        'core_values_criterias_mentor',
+        'job_performance_scores_evaluator',
+        'core_values_scores_evaluator',
+        'job_performance_scores_mentor',
+        'core_values_scores_mentor',
+        'overall_performance_mentor',
+        'overall_performance_evaluator',
+        'action_taken_mentor',
+        'comment_evaluator',
+        'comment_mentor'
+      ];
+      const fieldsAreFilled = fields.every(field => {
+        const value = evaluationFormDetails[field];
+        return Array.isArray(value) ? value.length > 0 : Boolean(value);
+      });
+
+      // If the fields are filled, include the intern in the response
+      if (fieldsAreFilled) {
+        return { ...intern, evaluationFormDetails };
+      }
+    }));
+
+    // Filter out any undefined values (interns where the fields were not filled)
+    const filteredInternsWithDetails = internsWithDetails.filter(Boolean);
+
+    // Send the result in the response
+    res.json(filteredInternsWithDetails);
+  } catch (err) {
+    // Log the error details
+    console.error('Error details:', err);
+
+    // Send an error response if something goes wrong
+    res.status(500).json({ error: err.message });
+  }
+};
   /*......................................dilum.......................*/
 
 
