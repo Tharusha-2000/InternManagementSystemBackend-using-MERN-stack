@@ -89,15 +89,14 @@ module.exports = router;
 /*......................................dilum.......................*/
 
 //router.get("/interns",controller.getInterns);
-const {getEvInterns} = require('../authcontrol/controller');
-router.get('/Evinterns', getEvInterns);
 
 
+router.get('/Evinterns', middleware.Auth, controller.getEvInterns);
 //router to get evaluators
 router.get('/evaluators', middleware.Auth, controller.getEvaluators);
 //rout to post evaluator name into evaluationformdetails collection
-const {postEvaluatorName} = require('../authcontrol/controller');
-router.post('/evaluatorname', postEvaluatorName);
+
+router.post('/evaluatorname', middleware.Auth, controller.postEvaluatorName);
 
 //router to delete evaluationform details
 const {deleteeformData} = require('../authcontrol/controller');
