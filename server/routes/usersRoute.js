@@ -54,8 +54,6 @@ router.put("/updateuser",middleware.Auth,controller.updateuser);
 router.put('/uploadImage',middleware.Auth,controller.uploadImageByuser);
 
 
-
-
 /*..........................................cv part................................................. */
 router.put('/uploadcv',middleware.Auth,controller.uploadcvByAdmin);
 router.put('/deletecv',middleware.Auth,controller.deletecvByAdmin);
