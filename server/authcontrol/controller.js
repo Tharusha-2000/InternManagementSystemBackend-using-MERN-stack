@@ -768,7 +768,7 @@ exports.postEvaluatorName = async (req, res) => {
 };
 
 
-// Delete all the data from the specified fields
+// Delete all the data from the specified fields and set them to their default values
 exports.deleteeformData = async (req, res) => {
   try {
     const { id } = req.body;
@@ -781,7 +781,18 @@ exports.deleteeformData = async (req, res) => {
         core_values_criterias_evaluator: [], // Set core_values_criterias_evaluator to its default value
         job_performance_criterias_mentor: [], // Set job_performance_criterias_mentor to its default value
         core_values_criterias_mentor: [], // Set core_values_criterias_mentor to its default value
+        job_performance_scores_evaluator: [], // Set job_performance_scores_evaluator to its default value
+        core_values_scores_evaluator: [], // Set core_values_scores_evaluator to its default value
+        job_performance_scores_mentor: [], // Set job_performance_scores_mentor to its default value
+        core_values_scores_mentor: [], // Set core_values_scores_mentor to its default value
+        overall_performance_mentor: null, // Set overall_performance_mentor to its default value
+        overall_performance_evaluator: null, // Set overall_performance_evaluator to its default value
+        action_taken_mentor: '', // Set action_taken_mentor to its default value
+        comment_evaluator: '', // Set comment_evaluator to its default value
+        comment_mentor: '', // Set comment_mentor to its default value
         evaluate_before: null, // Set evaluate_before to its default value
+        evaluated_date_Evaluator: null, // Set evaluated_date_Evaluator to its default value
+        evaluated_date_Mentor: null, // Set evaluated_date_Mentor to its default value
         eformstates: 'not created' // Set eformstates to 'not created'
       }, 
       { new: true }).lean();
@@ -796,7 +807,6 @@ exports.deleteeformData = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 
 
@@ -1131,6 +1141,29 @@ exports.getInternsForManager = async (req, res) => {
 
     // Send the result in the response
     res.json(filteredInternsWithDetails);
+  } catch (err) {
+    // Log the error details
+    console.error('Error details:', err);
+
+    // Send an error response if something goes wrong
+    res.status(500).json({ error: err.message });
+  }
+};
+
+//api to get all the mentors for drop down
+exports.getAllMentors = async (req, res) => {
+  try {
+    // Find all User documents where role is 'mentor', include fname, lname, and email in the result
+    const mentors = await User.find({ role: 'mentor' }, 'fname lname email').lean();
+
+    // Combine fname and lname into a fullName for each mentor
+    const mentorsWithFullName = mentors.map(mentor => ({
+      fullName: mentor.fname + ' ' + mentor.lname,
+      email: mentor.email
+    }));
+
+    // Send the result in the response
+    res.json(mentorsWithFullName);
   } catch (err) {
     // Log the error details
     console.error('Error details:', err);
