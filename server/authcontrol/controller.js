@@ -707,7 +707,7 @@ exports.getEvInterns = async (req, res) => {
 //get all the evaluators for evaluation form dropdown
 exports.getEvaluators = async (req, res) => {
   try {
-    if (req.data.role === "intern") {
+    if (req.data.role !== "admin") {
       return res
         .status(403)
         .json({ msg: "You do not have permission to access this function" });
