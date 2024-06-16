@@ -139,6 +139,10 @@ router.post('/postEvaluatorResultById/:id',postEvaluatorResultById);
 //manager page routes
 const{getInternsForManager} = require('../authcontrol/controller');
 router.get('/getInternsForManager',getInternsForManager);
+
+//get al the mentors fordrop down
+const{getAllMentors} = require('../authcontrol/controller');
+router.get('/getAllMentors',getAllMentors);
 /*......................................dilum.......................*/
 
 
