@@ -38,6 +38,9 @@ router.get('/taskNotify',middleware.Auth,controller.getTasklistMentorNotificatio
 router.put('/taskVerify/:id',middleware.Auth,controller.getTaskVarify);
 router.get('/task/:id',middleware.Auth,controller.getTaskIntern);
 
+
+/*..........................................SendeEmailToUsers................................................ */
+router.post("/sendUserToEmail",middleware.Auth,controller.sendEmailToUsers,mailer.sendEmail);
 /*..........................................secure................................................. */
 router.put('/secure',middleware.Auth,controller.secure);
 /*..........................................create intren profile................................................ */
@@ -52,8 +55,6 @@ router.put('/updateinterns',middleware.Auth,controller.updateinternprofile);
 router.get('/user',middleware.Auth,controller.getUser);
 router.put("/updateuser",middleware.Auth,controller.updateuser);
 router.put('/uploadImage',middleware.Auth,controller.uploadImageByuser);
-
-
 
 
 /*..........................................cv part................................................. */
@@ -95,11 +96,64 @@ module.exports = router;
 
 /*......................................hansi.......................*/
 
+
 /*......................................dilum.......................*/
 
+//router.get("/interns",controller.getInterns);
+
+
+router.get('/Evinterns', middleware.Auth, controller.getEvInterns);
+//router to get evaluators
+router.get('/evaluators', middleware.Auth, controller.getEvaluators);
+//rout to post evaluator name into evaluationformdetails collection
+
+router.post('/evaluatorname', middleware.Auth, controller.postEvaluatorName);
+
+//router to delete evaluationform details
+const {deleteeformData} = require('../authcontrol/controller');
+router.delete('/deleteeformData', deleteeformData);
 
 
 
+
+
+//mentor pages routes
+const{checkMentor} = require('../authcontrol/controller');
+router.get('/checkMentor/:userId', checkMentor);
+
+//get critirias for mentor
+const {getCriteriaById} = require('../authcontrol/controller');
+router.get('/getCriteriaById/:id', getCriteriaById);
+
+
+//tempory routing for adding remaining feilds in collection
+const {setDefaultEformstates} = require('../authcontrol/controller');
+router.post('/setDefaultEformstates', setDefaultEformstates);
+
+//routes for store mentor scores of evaluation forms
+const { storeMentorScoresById } = require('../authcontrol/controller');
+router.post('/storeMentorScores/:id', storeMentorScoresById);
+
+
+//tempory route for deleting data which is filled by mentor 
+const{deleteInfoByIdTem}=require('../authcontrol/controller');
+router.delete('/deleteInfoByIdTem/:id',deleteInfoByIdTem);
+//routes for evaluators section
+//get all the interns by evaluator
+const{getInternsByEvaluator} = require('../authcontrol/controller');
+router.get('/getInternsByEvaluator/:id',getInternsByEvaluator);
+
+//post evaluator evaluation results by id
+const{postEvaluatorResultById} = require('../authcontrol/controller');
+router.post('/postEvaluatorResultById/:id',postEvaluatorResultById);
+
+//manager page routes
+const{getInternsForManager} = require('../authcontrol/controller');
+router.get('/getInternsForManager',getInternsForManager);
+
+//get al the mentors fordrop down
+const{getAllMentors} = require('../authcontrol/controller');
+router.get('/getAllMentors',getAllMentors);
 /*......................................dilum.......................*/
 
 
