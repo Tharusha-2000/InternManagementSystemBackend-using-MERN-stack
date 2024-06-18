@@ -600,22 +600,22 @@ exports.secure = async (req, res) => {
 
    //upload cv user
    exports.uploadcvByAdmin=async (req, res) => {
-    // hansi oya haduvata passe meke admin vithane hadanne
-    // const { role } = req.data;
-    // if (role !== "admin") {
-    //   return res.status(403).json({ error: "You are not allowed to access this function" });
-    // } 
-    // const { id } = req.params;
-    //meka tike add keranne
-
-    const { id } = req.data;
-    console.log(req.body);
+    const { role } = req.data;
+    if (role !== "admin") {
+      return res.status(403).json({ error: "You are not allowed to access this function" });
+    }
+   const { cvUrl } = req.body;
+   const { userId } = req.params; 
+ 
+    if (!cvUrl || !userId) {
+      return res.status(400).json({ msg: "Please provide both cvfileURL and userId" });
+    }
         try {
-          const updateduser = await User.findByIdAndUpdate(id, req.body, { new: true });
+          const updateduser = await User.findByIdAndUpdate(userId, { cvUrl }, { new: true });
           if (!updateduser) {
             return res.status(404).json({ message: ' user not found' });
           }
-          res.json({msg:"update successfully", updateduser});
+          res.json({msg:" Update cv file successfully", updateduser});
           
         } catch (error) {
           res.status(500).json({ msg: "Internal Server Error" });
@@ -624,26 +624,21 @@ exports.secure = async (req, res) => {
   };
 
   exports.deletecvByAdmin=async (req, res) => {
-    // hansi oya haduvata passe meke admin vithane hadanne
-    // const { role } = req.data;
-    // if (role !== "admin") {
-    //   return res.status(403).json({ error: "You are not allowed to access this function" });
-    // } 
-    // const { id } = req.params;
-    //meka tike add keranne
-
-    const { id } = req.data;
-    console.log(hi);
+    const { role } = req.data;
+    if (role !== "admin") {
+      return res.status(403).json({ error: "You are not allowed to access this function" });
+    }
+   const { userId } = req.params;
     console.log(req.body);
         try {
-          const user = await User.findById(id);
+          const user = await User.findById(userId);
           if (!user) {
             return res.status(404).json({ message: 'User not found' });
           }
-          if (user.cvurl === null) {
+          if (user.cvUrl === null) {
           return res.json({ msg: "CV URL is null", user });
          }
-          user.cvurl = null;
+          user.cvUrl = null;
           await user.save();
           res.json({ msg: "CV URL deleted", user });
         } catch (error) {
@@ -651,6 +646,139 @@ exports.secure = async (req, res) => {
         }
   
   };
+
+
+  exports.viewByAdmin=async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(404).json({ msg: 'User not found' });
+      }
+      res.json({ cvUrl: user.cvUrl });
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ msg: 'Server error' });
+    }
+  };
+
+
+ /*......................................work schedule.......................*/
+
+ exports.createWorkSchedule = async (req, res) => {
+  const { id } = req.data;  
+  const { schedules: newSchedules } = req.body;  
+   try {
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    const updatedSchedules = [...user.schedules, ...newSchedules];
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { schedules: updatedSchedules },
+      { new: true }
+    );
+    res.json({ msg: "Schedules updated successfully", updatedUser });
+  } catch (error) {
+    res.status(500).json({ msg: "Internal Server Error" });
+  }
+};
+
+exports.deleteWorkSchedule = async (req, res) => {
+  const { id, eventId } = req.params;
+   try {
+    const user = await User.findById(id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+   user.schedules = user.schedules.filter(schedule => schedule._id.toString() !== eventId);
+    await user.save();
+    res.status(200).json({ message: 'Event deleted successfully' });
+  } catch (error) {
+    console.error("Error deleting work schedule:", error.message);
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
+  }
+};
+
+exports.fetchAllUsers = async (req, res) => {
+  try {
+    const users = await User.find();
+    res.status(200).json({ success: true, users });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json("Internal Server Error");
+  }
+};
+
+/*......................................Leave............................................*/
+exports.applyLeave = async (req, res) => {
+  const { userId, leaveDate, reason } = req.body;
+
+  if (!userId || !leaveDate || !reason) {
+    return res.status(400).json({ message: 'Please provide userId, leaveDate, and reason for the leave.' });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    user.leaveApplications.push({ leaveDate, reason });
+
+    await user.save();
+
+    res.status(201).json({ message: 'Leave application submitted successfully', leaveApplication: { leaveDate, reason } });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+exports.getLeaveApplications = async (req, res) => {
+  try {
+    const usersWithLeaveApplications = await User.find({ leaveApplications: { $exists: true, $not: { $size: 0 } } })
+      .select('leaveApplications fname lname jobtitle imageUrl') 
+      .lean();
+    const leaveApplications = usersWithLeaveApplications.flatMap(user => 
+      user.leaveApplications.map(application => ({
+        ...application,
+        user: { fname: user.fname, lname: user.lname, jobtitle: user.jobtitle, imageUrl: user.imageUrl } 
+      }))
+    );
+
+    res.status(200).json({ leaveApplications });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+
+exports.updateLeaveStatus = async (req, res) => {
+  const { userId, leaveApplicationId, status } = req.body;
+
+  if (!userId || !leaveApplicationId || !status) {
+    return res.status(400).json({ message: 'Please provide userId, leaveApplicationId, and status.' });
+  }
+
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const leaveApplication = user.leaveApplications.id(leaveApplicationId);
+    if (!leaveApplication) {
+      return res.status(404).json({ message: 'Leave application not found' });
+    }
+
+    leaveApplication.status = status;
+    await user.save();
+
+    res.status(200).json({ message: 'Leave status updated successfully', leaveApplication });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
 
 /*......................................send email to user.......................*/
   exports.sendEmailToUsers = async (req, res, next) => {
@@ -672,9 +800,17 @@ exports.secure = async (req, res) => {
     }
   };
 
+
 /*......................................dilum.......................*/
 exports.getEvInterns = async (req, res) => {
   try {
+    // Check if the user's role is not 'admin'
+    if (req.data.role !== "admin") {
+      return res
+        .status(403)
+        .json({ msg: "You do not have permission to access this function" });
+    }
+
     const users = await User.find({ role: 'intern' }).lean();
 
     const promises = users.map(async user => {
@@ -719,7 +855,6 @@ exports.getEvInterns = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 //get all the evaluators for evaluation form dropdown
 exports.getEvaluators = async (req, res) => {
   try {
@@ -784,7 +919,7 @@ exports.postEvaluatorName = async (req, res) => {
 };
 
 
-// Delete all the data from the specified fields
+// Delete all the data from the specified fields and set them to their default values
 exports.deleteeformData = async (req, res) => {
   try {
     const { id } = req.body;
@@ -797,7 +932,18 @@ exports.deleteeformData = async (req, res) => {
         core_values_criterias_evaluator: [], // Set core_values_criterias_evaluator to its default value
         job_performance_criterias_mentor: [], // Set job_performance_criterias_mentor to its default value
         core_values_criterias_mentor: [], // Set core_values_criterias_mentor to its default value
+        job_performance_scores_evaluator: [], // Set job_performance_scores_evaluator to its default value
+        core_values_scores_evaluator: [], // Set core_values_scores_evaluator to its default value
+        job_performance_scores_mentor: [], // Set job_performance_scores_mentor to its default value
+        core_values_scores_mentor: [], // Set core_values_scores_mentor to its default value
+        overall_performance_mentor: null, // Set overall_performance_mentor to its default value
+        overall_performance_evaluator: null, // Set overall_performance_evaluator to its default value
+        action_taken_mentor: '', // Set action_taken_mentor to its default value
+        comment_evaluator: '', // Set comment_evaluator to its default value
+        comment_mentor: '', // Set comment_mentor to its default value
         evaluate_before: null, // Set evaluate_before to its default value
+        evaluated_date_Evaluator: null, // Set evaluated_date_Evaluator to its default value
+        evaluated_date_Mentor: null, // Set evaluated_date_Mentor to its default value
         eformstates: 'not created' // Set eformstates to 'not created'
       }, 
       { new: true }).lean();
@@ -812,7 +958,6 @@ exports.deleteeformData = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 
 
@@ -1155,6 +1300,29 @@ exports.getInternsForManager = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+//api to get all the mentors for drop down
+exports.getAllMentors = async (req, res) => {
+  try {
+    // Find all User documents where role is 'mentor', include fname, lname, and email in the result
+    const mentors = await User.find({ role: 'mentor' }, 'fname lname email').lean();
+
+    // Combine fname and lname into a fullName for each mentor
+    const mentorsWithFullName = mentors.map(mentor => ({
+      fullName: mentor.fname + ' ' + mentor.lname,
+      email: mentor.email
+    }));
+
+    // Send the result in the response
+    res.json(mentorsWithFullName);
+  } catch (err) {
+    // Log the error details
+    console.error('Error details:', err);
+
+    // Send an error response if something goes wrong
+    res.status(500).json({ error: err.message });
+  }
+};
   /*......................................dilum.......................*/
 
 
@@ -1164,4 +1332,3 @@ exports.getInternsForManager = async (req, res) => {
   /*......................................hansi.......................*/
 
 
-  /*......................................hansi.......................*/

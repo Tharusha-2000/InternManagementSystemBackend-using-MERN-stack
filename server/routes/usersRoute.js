@@ -58,8 +58,18 @@ router.put('/uploadImage',middleware.Auth,controller.uploadImageByuser);
 
 
 /*..........................................cv part................................................. */
-router.put('/uploadcv',middleware.Auth,controller.uploadcvByAdmin);
-router.put('/deletecv',middleware.Auth,controller.deletecvByAdmin);
+router.put('/:userId/uploadcv',middleware.Auth,controller.uploadcvByAdmin);
+router.put('/:userId/deletecv',middleware.Auth,controller.deletecvByAdmin);
+router.get('/:userId/viewcv',middleware.Auth,controller.viewByAdmin);
+
+/*........................................work schedule................................................*/
+router.post('/workschedule',middleware.Auth,controller.createWorkSchedule);
+router.delete('/:id/schedule/:eventId', middleware.Auth, controller.deleteWorkSchedule);
+router.get('/allusers', middleware.Auth, controller.fetchAllUsers);
+/*......................................Leave............................................*/ 
+router.post('/applyLeave', middleware.Auth, controller.applyLeave);
+router.get('/getLeaveApplications', middleware.Auth, controller.getLeaveApplications);
+router.put('/updateLeaveStatus', middleware.Auth, controller.updateLeaveStatus);
 /*..........................................evaluvationpart................................................. */
 
 
@@ -90,15 +100,14 @@ module.exports = router;
 /*......................................dilum.......................*/
 
 //router.get("/interns",controller.getInterns);
-const {getEvInterns} = require('../authcontrol/controller');
-router.get('/Evinterns', getEvInterns);
 
 
+router.get('/Evinterns', middleware.Auth, controller.getEvInterns);
 //router to get evaluators
 router.get('/evaluators', middleware.Auth, controller.getEvaluators);
 //rout to post evaluator name into evaluationformdetails collection
-const {postEvaluatorName} = require('../authcontrol/controller');
-router.post('/evaluatorname', postEvaluatorName);
+
+router.post('/evaluatorname', middleware.Auth, controller.postEvaluatorName);
 
 //router to delete evaluationform details
 const {deleteeformData} = require('../authcontrol/controller');
@@ -141,6 +150,10 @@ router.post('/postEvaluatorResultById/:id',postEvaluatorResultById);
 //manager page routes
 const{getInternsForManager} = require('../authcontrol/controller');
 router.get('/getInternsForManager',getInternsForManager);
+
+//get al the mentors fordrop down
+const{getAllMentors} = require('../authcontrol/controller');
+router.get('/getAllMentors',getAllMentors);
 /*......................................dilum.......................*/
 
 
