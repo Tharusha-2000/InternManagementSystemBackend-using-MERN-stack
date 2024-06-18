@@ -38,6 +38,9 @@ router.get('/taskNotify',middleware.Auth,controller.getTasklistMentorNotificatio
 router.put('/taskVerify/:id',middleware.Auth,controller.getTaskVarify);
 router.get('/task/:id',middleware.Auth,controller.getTaskIntern);
 
+
+/*..........................................SendeEmailToUsers................................................ */
+router.post("/sendUserToEmail",middleware.Auth,controller.sendEmailToUsers,mailer.sendEmail);
 /*..........................................secure................................................. */
 router.put('/secure',middleware.Auth,controller.secure);
 /*..........................................create intren profile................................................ */
