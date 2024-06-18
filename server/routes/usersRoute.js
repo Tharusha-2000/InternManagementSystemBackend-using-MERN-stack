@@ -58,8 +58,18 @@ router.put('/uploadImage',middleware.Auth,controller.uploadImageByuser);
 
 
 /*..........................................cv part................................................. */
-router.put('/uploadcv',middleware.Auth,controller.uploadcvByAdmin);
-router.put('/deletecv',middleware.Auth,controller.deletecvByAdmin);
+router.put('/:userId/uploadcv',middleware.Auth,controller.uploadcvByAdmin);
+router.put('/:userId/deletecv',middleware.Auth,controller.deletecvByAdmin);
+router.get('/:userId/viewcv',middleware.Auth,controller.viewByAdmin);
+
+/*........................................work schedule................................................*/
+router.post('/workschedule',middleware.Auth,controller.createWorkSchedule);
+router.delete('/:id/schedule/:eventId', middleware.Auth, controller.deleteWorkSchedule);
+router.get('/allusers', middleware.Auth, controller.fetchAllUsers);
+/*......................................Leave............................................*/ 
+router.post('/applyLeave', middleware.Auth, controller.applyLeave);
+router.get('/getLeaveApplications', middleware.Auth, controller.getLeaveApplications);
+router.put('/updateLeaveStatus', middleware.Auth, controller.updateLeaveStatus);
 /*..........................................evaluvationpart................................................. */
 
 
