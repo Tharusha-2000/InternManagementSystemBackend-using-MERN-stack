@@ -156,9 +156,11 @@ exports.deleteUser = async (req, res) => {
     }
     let id = req.params.id;
     const user = await User.findByIdAndDelete(id);
-        
-    //not nessary
-    if (req.data.id === id) {
+     // Delete tasks associated with the user
+                 await Task.deleteMany({ _userId: id });   
+
+    //if loguser delete him  then active this 
+     if (req.data.id === id) {
       return res
         .status(403)
         .json({ msg: "You do not have permission to access this function" });
@@ -167,6 +169,7 @@ exports.deleteUser = async (req, res) => {
     if (!user) {
       return res.status(404).json("User not found");
     }
+      
 
     res.status(200).json({ msg: "User deleted" });
   } catch (error) {
@@ -216,8 +219,11 @@ exports.changeRole = async (req, res) => {
   }
 };
 
-//register user
 
+
+
+
+//register user
 exports.register = async (req, res, next) => {
   try {
     if (req.data.role !== "admin") {
@@ -415,7 +421,7 @@ exports.createTask=async(req, res) => {
   const { id } = req.data;
   console.log(id);
   if (req.data.role!=="intern"){
-    return res.status(401).json({ error: "You are not authorized to set this data" });
+    return res.status(401).json({ msg: "You are not authorized to set this data" });
    }
 
   let title = req.body.title;
@@ -477,13 +483,10 @@ exports.updateTask= async (req, res) => {
       updatedtask.mentorEmail = mentorEmail;
       await updatedtask.save();
       console.log(mentorEmail);
-      
     }
     if(!updatedtask.isComplete){
       updatedtask.mentorEmail = null;
-      await updatedtask.save();
-     
-      
+      await updatedtask.save(); 
      }
 
   } catch (err) {
@@ -504,7 +507,7 @@ exports.getTasklistMentorNotification= async (req, res) => {
     const email = user.email;
     console.log(email);
 
-    const tasks = await Task.find({ mentorEmail:email, isComplete: true, isVerified: false})
+    const tasks = await Task.find({ mentorEmail:email, isComplete: true })
                          .populate('_userId');
     console.log(tasks);
 
@@ -649,6 +652,25 @@ exports.secure = async (req, res) => {
   
   };
 
+/*......................................send email to user.......................*/
+  exports.sendEmailToUsers = async (req, res, next) => {
+    const { id } = req.data;
+    const { email, subject, message } = req.body;
+    try {
+      const user = await User.findById(id);
+      console.log(user.email);
+      UserEmail=user.email;
+      
+      const emailUser = await User.findOne({ email});
+      if (!emailUser) {
+        return res.status(403).json({msg: "user not found "});
+      }
+      res.locals.userData = { email, subject, message,UserEmail };
+      next();
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
 /*......................................dilum.......................*/
 exports.getEvInterns = async (req, res) => {
@@ -1173,6 +1195,8 @@ exports.getAllMentors = async (req, res) => {
   }
 };
   /*......................................dilum.......................*/
+
+
 
 
 
