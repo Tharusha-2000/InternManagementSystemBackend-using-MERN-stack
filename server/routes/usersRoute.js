@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const EvaluationFormDetails = require("../models/Evaluationformdetails");
 
 
 const controller = require('../authcontrol/controller')
@@ -86,61 +86,38 @@ module.exports = router;
 
 /*......................................dilum.......................*/
 
-//router.get("/interns",controller.getInterns);
-
-
 router.get('/Evinterns', middleware.Auth, controller.getEvInterns);
-//router to get evaluators
-router.get('/evaluators', middleware.Auth, controller.getEvaluators);
-//rout to post evaluator name into evaluationformdetails collection
+router.get('/evaluators', middleware.Auth, controller.getEvaluators);//router to get evaluators
+router.post('/evaluatorname', middleware.Auth, controller.postEvaluatorName);//router to post evaluator name into evaluationformdetails collection
+const { deleteeformData, checkMentor, getCriteriaById,  storeMentorScoresById,  getInternsByEvaluator, postEvaluatorResultById, getInternsForManager, getAllMentors,getReviewDetailsById } = require('../authcontrol/controller');
 
-router.post('/evaluatorname', middleware.Auth, controller.postEvaluatorName);
+// Route to delete evaluation form details
+router.delete('/deleteeformData', middleware.Auth, deleteeformData);
 
-//router to delete evaluationform details
-const {deleteeformData} = require('../authcontrol/controller');
-router.delete('/deleteeformData', deleteeformData);
+// Mentor pages routes
+// Get intern list for relevant mentor
+router.get('/checkMentor/:userId', middleware.Auth, checkMentor);
+// Get criteria for mentor
+router.get('/getCriteriaById/:id', middleware.Auth, getCriteriaById);
 
-
-
-
-
-//mentor pages routes
-const{checkMentor} = require('../authcontrol/controller');
-router.get('/checkMentor/:userId', checkMentor);
-
-//get critirias for mentor
-const {getCriteriaById} = require('../authcontrol/controller');
-router.get('/getCriteriaById/:id', getCriteriaById);
+// Routes for store mentor scores of evaluation forms
+router.post('/storeMentorScores/:id', middleware.Auth, storeMentorScoresById);
 
 
-//tempory routing for adding remaining feilds in collection
-const {setDefaultEformstates} = require('../authcontrol/controller');
-router.post('/setDefaultEformstates', setDefaultEformstates);
+// Routes for evaluators section
+// Get all the interns for evaluator
+router.get('/getInternsByEvaluator/:id', middleware.Auth, getInternsByEvaluator);
+// Post evaluator evaluation results by id
+router.post('/postEvaluatorResultById/:id', middleware.Auth, postEvaluatorResultById);
 
-//routes for store mentor scores of evaluation forms
-const { storeMentorScoresById } = require('../authcontrol/controller');
-router.post('/storeMentorScores/:id', storeMentorScoresById);
+// Manager page routes
+// Get all the evaluation details for manager
+router.get('/getInternsForManager', middleware.Auth, getInternsForManager);
+// Router for get evaluation details for review
+router.get('/getAllMentors', middleware.Auth, getAllMentors);
+// Route to get review details by ID
+router.get('/getReviewDetailsById/:id', middleware.Auth, getReviewDetailsById);
 
-
-//tempory route for deleting data which is filled by mentor 
-const{deleteInfoByIdTem}=require('../authcontrol/controller');
-router.delete('/deleteInfoByIdTem/:id',deleteInfoByIdTem);
-//routes for evaluators section
-//get all the interns by evaluator
-const{getInternsByEvaluator} = require('../authcontrol/controller');
-router.get('/getInternsByEvaluator/:id',getInternsByEvaluator);
-
-//post evaluator evaluation results by id
-const{postEvaluatorResultById} = require('../authcontrol/controller');
-router.post('/postEvaluatorResultById/:id',postEvaluatorResultById);
-
-//manager page routes
-const{getInternsForManager} = require('../authcontrol/controller');
-router.get('/getInternsForManager',getInternsForManager);
-
-//get al the mentors fordrop down
-const{getAllMentors} = require('../authcontrol/controller');
-router.get('/getAllMentors',getAllMentors);
 /*......................................dilum.......................*/
 
 
