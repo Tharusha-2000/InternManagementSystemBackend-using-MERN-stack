@@ -1197,6 +1197,38 @@ exports.getReviewDetailsById = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+//intern evaluation pdf generate
+exports.getCommentsById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const evaluationFormDetails = await EvaluationFormDetails.findOne({ user: id })
+      .populate('user', 'fname lname dob role email gender jobtitle employmentType mentor')
+      .select("comment_evaluator overall_performance_mentor overall_performance_evaluator action_taken_mentor comment_mentor evaluated_date_Evaluator evaluated_date_Mentor evaluator");
+
+    if (!evaluationFormDetails) {
+      return res.status(404).json({
+        message: "Evaluation form details not found for the given user ID",
+      });
+    }
+
+    // Check if any of the specified fields are not filled
+    const fieldsToCheck = ['comment_evaluator', 'overall_performance_mentor', 'overall_performance_evaluator', 'action_taken_mentor', 'comment_mentor', 'evaluated_date_Evaluator', 'evaluated_date_Mentor'];
+    let isEvaluated = true;
+    for (const field of fieldsToCheck) {
+      if (!evaluationFormDetails[field]) {
+        isEvaluated = false;
+        break;
+      }
+    }
+
+    // Return the evaluationFormDetails object including user data, evaluator and mentor names, and isEvaluated status
+    res.json({ ...evaluationFormDetails.toObject(), isEvaluated });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 /*......................................dilum.......................*/
 
 /*......................................hansi.......................*/

@@ -86,37 +86,33 @@ module.exports = router;
 
 /*......................................dilum.......................*/
 
+// Route to get evaluation interns
 router.get('/Evinterns', middleware.Auth, controller.getEvInterns);
-router.get('/evaluators', middleware.Auth, controller.getEvaluators);//router to get evaluators
-router.post('/evaluatorname', middleware.Auth, controller.postEvaluatorName);//router to post evaluator name into evaluationformdetails collection
-const { deleteeformData, checkMentor, getCriteriaById,  storeMentorScoresById,  getInternsByEvaluator, postEvaluatorResultById, getInternsForManager, getAllMentors,getReviewDetailsById } = require('../authcontrol/controller');
-
+// Route to get evaluators
+router.get('/evaluators', middleware.Auth, controller.getEvaluators);
+// Route to post evaluator name into evaluationformdetails collection
+router.post('/evaluatorname', middleware.Auth, controller.postEvaluatorName);
 // Route to delete evaluation form details
-router.delete('/deleteeformData', middleware.Auth, deleteeformData);
-
-// Mentor pages routes
-// Get intern list for relevant mentor
-router.get('/checkMentor/:userId', middleware.Auth, checkMentor);
-// Get criteria for mentor
-router.get('/getCriteriaById/:id', middleware.Auth, getCriteriaById);
-
-// Routes for store mentor scores of evaluation forms
-router.post('/storeMentorScores/:id', middleware.Auth, storeMentorScoresById);
-
-
-// Routes for evaluators section
-// Get all the interns for evaluator
-router.get('/getInternsByEvaluator/:id', middleware.Auth, getInternsByEvaluator);
-// Post evaluator evaluation results by id
-router.post('/postEvaluatorResultById/:id', middleware.Auth, postEvaluatorResultById);
-
-// Manager page routes
-// Get all the evaluation details for manager
-router.get('/getInternsForManager', middleware.Auth, getInternsForManager);
-// Router for get evaluation details for review
-router.get('/getAllMentors', middleware.Auth, getAllMentors);
+router.delete('/deleteeformData', middleware.Auth, controller.deleteeformData);
+// Route to get intern list for relevant mentor
+router.get('/checkMentor/:userId', middleware.Auth,controller. checkMentor);
+// Route to get criteria for mentor
+router.get('/getCriteriaById/:id', middleware.Auth,controller. getCriteriaById);
+// Route to store mentor scores of evaluation forms
+router.post('/storeMentorScores/:id', middleware.Auth, controller.storeMentorScoresById);
+// Route to get all the interns for evaluator
+router.get('/getInternsByEvaluator/:id', middleware.Auth, controller.getInternsByEvaluator);
+// Route to post evaluator evaluation results by id
+router.post('/postEvaluatorResultById/:id', middleware.Auth, controller.postEvaluatorResultById);
+// Route to get all the evaluation details for manager
+router.get('/getInternsForManager', middleware.Auth, controller.getInternsForManager);
+// Route to get all mentors for evaluation details review
+router.get('/getAllMentors', middleware.Auth, controller.getAllMentors);
 // Route to get review details by ID
-router.get('/getReviewDetailsById/:id', middleware.Auth, getReviewDetailsById);
+router.get('/getReviewDetailsById/:id', middleware.Auth, controller.getReviewDetailsById);
+// Route to get evaluation details of interns by ID (evaluation PDF for interns)
+router.get('/getCommentsById/:id', middleware.Auth, controller.getCommentsById);
+
 
 /*......................................dilum.......................*/
 
