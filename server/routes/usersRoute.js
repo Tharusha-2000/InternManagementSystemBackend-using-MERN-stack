@@ -87,7 +87,6 @@ router.put('/updateLeaveStatus', middleware.Auth, controller.updateLeaveStatus);
 module.exports = router;
 
 
-
 /*......................................sanugi.......................*/
 
 
