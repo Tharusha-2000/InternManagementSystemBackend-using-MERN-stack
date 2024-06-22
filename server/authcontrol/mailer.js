@@ -34,11 +34,12 @@ exports.sendingOTPMail = async (req, res) => {
        res.status(500).json({ msg: "server error"});
      } else {
        console.log('Email sent: ' + info.response);
-          res.status(201).send({ msg: "otp send!",code: otp})
+
+       res.status(201).send({ msg: "otp send!",code: otp})
+
      }
     });
-     
-    
+
     } catch (error) {
       console.error(error);
       res.status(500).send({ error: "Internal Server Error" });
@@ -73,6 +74,7 @@ exports.sendWelcomeEmail = (req, res) => {
                 <p><strong>Password:</strong> ${password}</p>
               </div>
               <p style="text-align: center; color: #333;">Your are welcome!</p>
+              <p style="text-align: center; color: #333;"><a href="https://imsfrontend.vercel.app/">Visit our site</a></p>
             </div> `
 
 
@@ -84,11 +86,12 @@ exports.sendWelcomeEmail = (req, res) => {
             res.status(500).json({ msg: "server error"});
         } else {
           console.log('Email sent: ' + info.response);
-          res.status(201).json({ msg: "User signed in successfully", success: true});
+
+          res.status(201).json({ msg: "User registered successfully", success: true});
         }
       });
       
-    
+
     }catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
@@ -96,3 +99,41 @@ exports.sendWelcomeEmail = (req, res) => {
  
 };
 
+exports.sendEmail = (req, res) => {
+  
+  try {
+    const { email, subject, message,UserEmail } = res.locals.userData;
+    console.log(UserEmail)
+    var transporter = nodemailer.createTransport({
+
+        service: 'gmail',
+       // port: 534,
+        auth: {
+          user: process.env.Email,
+          pass: process.env.Password 
+        }
+      });
+      
+      var mailOptions = {
+        from: process.env.Email,
+        to: email,
+        subject: subject,
+        html: `Message from ${UserEmail}: ${message}`
+      };
+      
+      transporter.sendMail(mailOptions, function(error, info){
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+          res.status(201).json({ msg: "User send email successfully", success: true});
+        }
+      });
+      
+     
+    }catch (error) {
+      console.error(error);
+      res.status(500).json({ error: "Internal Server Error" });
+    }
+ 
+};

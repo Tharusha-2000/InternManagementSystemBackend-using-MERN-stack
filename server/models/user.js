@@ -50,12 +50,15 @@ const userSchema = mongoose.Schema(
       type: String,
       required:false,
     },
-    image: {
+    imageUrl: {
       type: String,
       required: false,
     },
-
-
+    cvUrl :{
+      type: String,
+      required: false,
+    },
+ 
   university: {
     type: String,
    // required: true
@@ -93,10 +96,29 @@ const userSchema = mongoose.Schema(
   Bio:{
     type: String,
     
-  }
-
-
-    
+  },
+  schedules: [{
+    title: String,
+    start: Date,
+    end: Date,
+  }],
+  leaveApplications: [{
+    leaveDate: {
+      type: Date,
+      required: true,
+    },
+    reason: {
+      type: String,
+      required: true,
+    },
+    status: {
+      type: String,
+      required: true,
+      enum: ['Pending', 'Approved', 'Rejected'],
+      default: 'Pending',
+    },
+  }],
+  
    },
   );
    userSchema.pre("save", async function () {
