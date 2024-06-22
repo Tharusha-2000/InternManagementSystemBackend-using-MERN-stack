@@ -7,13 +7,8 @@ const controller = require('../authcontrol/controller')
 const mailer = require('../authcontrol/mailer')
 const User = require("../models/user");
 const Task = require("../models/task.js");
-// const bcrypt = require("bcryptjs");
-// const jwt = require("jsonwebtoken");
-// const ENV= require('../config.js');
 const middleware = require('../middleware/auth.js');
 
-
-// var nodemailer = require('nodemailer');
 
 /*..........................................login.................................................... */
 router.post("/login",controller.login);
@@ -90,17 +85,3 @@ module.exports = router;
 
 
 
-
-/*......................................sanugi.......................*/
-
-
-/*......................................hansi.......................*/
-
-
-/*......................................hansi.......................*/
-
-
-/*......................................dilum.......................*/
-
-//router.get("/interns",controller.getInterns);
-// Route to get evaluation interns
