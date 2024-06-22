@@ -70,7 +70,6 @@ exports.generateOTP = async (req, res, next) => {
       const otpTimeout = setTimeout(() => {
         req.app.locals.OTP = null;
       }, 1 * 60 * 1000);
-
       next();
     }
   } catch (error) {
@@ -83,6 +82,10 @@ exports.generateOTP = async (req, res, next) => {
 /* verifyOTP that email */
 exports.verifyOTP = async (req, res) => {
   const { code } = req.query;
+
+  const otpTimeout = setTimeout(() => {
+    req.app.locals.OTP = null;
+  }, 1 * 60 * 1000);
 
   if (parseInt(req.app.locals.OTP) === parseInt(code)) {
     req.app.locals.OTP = null; // reset the OTP value

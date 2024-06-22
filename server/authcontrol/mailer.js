@@ -9,7 +9,6 @@ exports.sendingOTPMail = async (req, res) => {
      
       var transporter = nodemailer.createTransport({
         service: 'gmail',
-        port: 534,
          auth: {
            user: process.env.Email,
            pass: process.env.Password
@@ -32,10 +31,10 @@ exports.sendingOTPMail = async (req, res) => {
   transporter.sendMail(mailOptions, function(error, info){
      if (error) {
        console.log(error);
+       res.status(500).json({ msg: "server error"});
      } else {
        console.log('Email sent: ' + info.response);
-       res.status(201).send({ msg: "otp send!",code: otp})
-
+          res.status(201).send({ msg: "otp send!",code: otp})
      }
     });
     } catch (error) {
@@ -53,7 +52,6 @@ exports.sendWelcomeEmail = (req, res) => {
     var transporter = nodemailer.createTransport({
 
         service: 'gmail',
-        port: 534,
         auth: {
           user: process.env.Email,
           pass: process.env.Password
@@ -82,13 +80,14 @@ exports.sendWelcomeEmail = (req, res) => {
       transporter.sendMail(mailOptions, function(error, info){
         if (error) {
           console.log(error);
+            res.status(500).json({ msg: "server error"});
         } else {
           console.log('Email sent: ' + info.response);
+
           res.status(201).json({ msg: "User registered successfully", success: true});
         }
       });
       
-     
     }catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });
