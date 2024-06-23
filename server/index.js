@@ -31,7 +31,7 @@ app.use(body.json());
 
 
 
-app.listen(8000, () => {
+app.listen(8002, () => {
       console.log("Server is running")
  })
 //using the app object in another file
