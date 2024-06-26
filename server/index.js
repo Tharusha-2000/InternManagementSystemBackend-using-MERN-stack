@@ -10,11 +10,13 @@ const userRoute = require("./routes/usersRoute.js");
 const body=require('body-parser');
 const app = express() 
 
+
 const connectDB = require('./utils/db.js');
 connectDB();
 
+
 app.use(cors({
-    origin: ["http://localhost:5173"],
+    origin: ["https://imsfrontend.vercel.app"],
     methods: ['GET','POST','PUT',"DELETE"],
     credentials: true
 }))
@@ -31,18 +33,11 @@ app.use(body.json());
 
 
 
-app.listen(8900, () => {
+
+app.listen(8002, () => {
+
       console.log("Server is running")
  })
-//using the app object in another file
-// if (require.main === module) {
-//     // This module was run directly from the command line (i.e. this is the main module)
-//     app.listen(8008, () => {
-//       console.log("Server is running")
-//     });
-//   }
-  
-//   module.exports = app; // Export the app object  
 
 
 

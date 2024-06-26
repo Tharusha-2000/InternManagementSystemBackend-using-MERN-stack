@@ -26,7 +26,9 @@ const TaskSchema = new mongoose.Schema({
     }
 
 
-})
+}, {
+    timestamps: true 
+});
 
 const Task = mongoose.model('tasks', TaskSchema);
 
