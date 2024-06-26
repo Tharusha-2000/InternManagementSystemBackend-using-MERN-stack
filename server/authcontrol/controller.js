@@ -703,12 +703,9 @@ exports.getEvInterns = async (req, res) => {
       return {
         name: user.fname + " " + user.lname,
         mentor: user.mentor,
-        eformStatus: evaluationFormDetails
-          ? evaluationFormDetails.eformstates
-          : null,
-        evaluationFormDetailsId: evaluationFormDetails
-          ? evaluationFormDetails._id
-          : null, // Add the ObjectId of the EvaluationFormDetails document
+        eformStatus: evaluationFormDetails ? evaluationFormDetails.eformstates : null,
+        evaluationFormDetailsId: evaluationFormDetails ? evaluationFormDetails._id : null,
+        imageUrl: user.imageUrl // Correctly placed outside the ternary operator
       };
     });
 
@@ -720,7 +717,7 @@ exports.getEvInterns = async (req, res) => {
     // Remove EvaluationFormDetails documents that don't have a corresponding intern
     await EvaluationFormDetails.deleteMany({ user: { $nin: internIds } });
 
-    res.json(userDetails);
+    res.json(userDetails); // Send the userDetails as the response
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -850,8 +847,7 @@ exports.deleteeformData = async (req, res) => {
 };
 
 /*......................................mmentors page apis.......................*/
-
-exports.checkMentor = async (req, res) => {
+exports.getInternByMentor = async (req, res) => {
   try {
     // Get the logged-in user's id from the request parameters
     const userId = req.params.userId;
@@ -865,7 +861,7 @@ exports.checkMentor = async (req, res) => {
     // Find all User documents where mentor is the logged-in user
     const users = await User.find({ mentor: fullName }).lean();
 
-    // For each user, find the related Evaluationformdetails document where eformstates is 'created'
+    // For each user, find the related EvaluationFormDetails document where eformstates is 'created'
     const mentorDetails = [];
     for (let user of users) {
       const evaluationFormDetails = await EvaluationFormDetails.find({
@@ -874,23 +870,23 @@ exports.checkMentor = async (req, res) => {
       }).lean();
       for (let doc of evaluationFormDetails) {
         const isMentorFormFilled =
-        (doc.job_performance_scores_mentor?.length || 0) > 0 &&
-        (doc.core_values_scores_mentor?.length || 0) > 0 &&
-        doc.overall_performance_mentor > 0 &&
-        doc.action_taken_mentor !== "" &&
-        doc.comment_mentor !== "";
+          (doc.job_performance_scores_mentor?.length || 0) > 0 &&
+          (doc.core_values_scores_mentor?.length || 0) > 0 &&
+          doc.overall_performance_mentor > 0 &&
+          doc.action_taken_mentor !== "" &&
+          doc.comment_mentor !== "";
         mentorDetails.push({
           internName: user.fname + " " + user.lname,
           evaluateBefore: doc.evaluate_before,
           eformstates: doc.eformstates,
-          jobPerformanceCriteriasEvaluator:
-            doc.job_performance_criterias_evaluator,
+          jobPerformanceCriteriasEvaluator: doc.job_performance_criterias_evaluator,
           coreValuesCriteriasEvaluator: doc.core_values_criterias_evaluator,
           jobPerformanceCriteriasMentor: doc.job_performance_criterias_mentor,
           coreValuesCriteriasMentor: doc.core_values_criterias_mentor,
           evaluator: doc.evaluator,
           internId: doc._id,
           isMentorFormFilled: isMentorFormFilled,
+          imageUrl: user.imageUrl // Include imageUrl from the user object
         });
       }
     }
@@ -905,28 +901,27 @@ exports.checkMentor = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+// exports.getCriteriaById = async (req, res) => {
+//   try {
+//     // Get the ID from the request parameters
+//     const id = req.params.id;
 
-exports.getCriteriaById = async (req, res) => {
-  try {
-    // Get the ID from the request parameters
-    const id = req.params.id;
+//     // Find the EvaluationFormDetails document with the provided ID and only return the job_performance_criterias_mentor and core_values_criterias_mentor fields
+//     const evaluationFormDetails = await EvaluationFormDetails.findById(
+//       id,
+//       "job_performance_criterias_mentor core_values_criterias_mentor"
+//     ).lean();
 
-    // Find the EvaluationFormDetails document with the provided ID and only return the job_performance_criterias_mentor and core_values_criterias_mentor fields
-    const evaluationFormDetails = await EvaluationFormDetails.findById(
-      id,
-      "job_performance_criterias_mentor core_values_criterias_mentor"
-    ).lean();
+//     // Send the result in the response
+//     res.json(evaluationFormDetails);
+//   } catch (err) {
+//     // Log the error details
+//     console.error("Error details:", err);
 
-    // Send the result in the response
-    res.json(evaluationFormDetails);
-  } catch (err) {
-    // Log the error details
-    console.error("Error details:", err);
-
-    // Send an error response if something goes wrong
-    res.status(500).json({ error: err.message });
-  }
-};
+//     // Send an error response if something goes wrong
+//     res.status(500).json({ error: err.message });
+//   }
+// };
 
 
 
@@ -942,12 +937,16 @@ exports.storeMentorScoresById = async (req, res) => {
   } = req.body;
   const { id } = req.params; // Get the ID from the URL parameters
 
+  console.log(`Received request to store scores for intern ID: ${id}`);
+  console.log(`Request body: ${JSON.stringify(req.body)}`);
+
   try {
     // Find the document for the intern
     let evaluationFormDetails = await EvaluationFormDetails.findById(id);
 
     // If the document doesn't exist, return an error
     if (!evaluationFormDetails) {
+      console.error("No evaluation form found for this intern");
       return res
         .status(404)
         .json({ message: "No evaluation form found for this intern" });
@@ -968,91 +967,59 @@ exports.storeMentorScoresById = async (req, res) => {
     // Save the document
     await evaluationFormDetails.save();
 
+    console.log("Scores stored successfully");
     res.json({ message: "Scores stored successfully" });
   } catch (err) {
-    console.error(err.message);
+    console.error(`Server error: ${err.message}`);
     res.status(500).send(`Server error: ${err.message}`);
   }
 };
 
 
-//evaluator backend apis
 
+
+//evaluator backend apis
 exports.getInternsByEvaluator = async (req, res) => {
   try {
-    // Get the user's id from the request parameters
     const id = req.params.id;
-
-    // Find the User document with the given id
     const evaluator = await User.findById(id).lean();
 
-    // Check if the user exists
     if (!evaluator) {
       return res.status(404).json({ error: "User not found" });
     }
 
-    // Check if the user is an evaluator
     if (evaluator.role !== "evaluator") {
       return res.status(403).json({ error: "User is not an evaluator" });
     }
 
-    // Get the full name of the evaluator
     const evaluatorName = evaluator.fname + " " + evaluator.lname;
-
-    // Find all EvaluationFormDetails documents where evaluator is the evaluator's name
-    const evaluationFormDetails = await EvaluationFormDetails.find({
-      evaluator: evaluatorName,
-    }).lean();
-
-    // Get the ids of the users (interns) from the EvaluationFormDetails documents
+    const evaluationFormDetails = await EvaluationFormDetails.find({ evaluator: evaluatorName }).lean();
     const userIds = evaluationFormDetails.map((doc) => doc.user);
-
-    // Find all User documents with the ids from the EvaluationFormDetails documents
     const users = await User.find({ _id: { $in: userIds } }).lean();
 
-    // Get the full names of the users (interns), their evaluate_before dates, job_performance_criterias_evaluator, core_values_criterias_evaluator, their ids and the _id from the EvaluationFormDetails document
     const internDetails = users.map((user) => {
-      const userFormDetails = evaluationFormDetails.find(
-        (doc) => doc.user.toString() === user._id.toString()
-      );
-
-      // Check if all the fields are filled
-      const isEvaluated =
-        userFormDetails &&
-        Array.isArray(userFormDetails.job_performance_scores_evaluator) &&
-        userFormDetails.job_performance_scores_evaluator.length > 0 &&
-        Array.isArray(userFormDetails.core_values_scores_evaluator) &&
-        userFormDetails.core_values_scores_evaluator.length > 0 &&
-        typeof userFormDetails.overall_performance_evaluator === "number" &&
-        typeof userFormDetails.comment_evaluator === "string";
+      const userFormDetails = evaluationFormDetails.find((doc) => doc.user.toString() === user._id.toString());
+      const isEvaluated = userFormDetails && Array.isArray(userFormDetails.job_performance_scores_evaluator) && userFormDetails.job_performance_scores_evaluator.length > 0 && Array.isArray(userFormDetails.core_values_scores_evaluator) && userFormDetails.core_values_scores_evaluator.length > 0 && typeof userFormDetails.overall_performance_evaluator === "number" && typeof userFormDetails.comment_evaluator === "string";
 
       return {
         id: user._id,
         name: user.fname + " " + user.lname,
-        evaluate_before: userFormDetails
-          ? userFormDetails.evaluate_before
-          : null,
-        job_performance_criterias_evaluator: userFormDetails
-          ? userFormDetails.job_performance_criterias_evaluator
-          : null,
-        core_values_criterias_evaluator: userFormDetails
-          ? userFormDetails.core_values_criterias_evaluator
-          : null,
+        evaluate_before: userFormDetails ? userFormDetails.evaluate_before : null,
+        job_performance_criterias_evaluator: userFormDetails ? userFormDetails.job_performance_criterias_evaluator : null,
+        core_values_criterias_evaluator: userFormDetails ? userFormDetails.core_values_criterias_evaluator : null,
         evaluationFormDetailsId: userFormDetails ? userFormDetails._id : null,
         isEvaluated: isEvaluated,
+        imageUrl: user.imageUrl,
       };
     });
 
-    // Send the result in the response
     res.json(internDetails);
   } catch (err) {
-    // Log the error details
     console.error("Error details:", err);
-
-    // Send an error response if something goes wrong
     res.status(500).json({ error: err.message });
   }
 };
+
 
 exports.postEvaluatorResultById = async (req, res) => {
   try {
@@ -1106,6 +1073,11 @@ exports.getInternsForManager = async (req, res) => {
           user: intern._id,
         }).lean();
 
+        if (!evaluationFormDetails) {
+          // If no evaluation details are found, skip this intern
+          return null;
+        }
+
         // Check if the specified fields are filled
         const fields = [
           "job_performance_criterias_evaluator",
@@ -1130,11 +1102,13 @@ exports.getInternsForManager = async (req, res) => {
         // If the fields are filled, include the intern in the response
         if (fieldsAreFilled) {
           return { ...intern, evaluationFormDetails };
+        } else {
+          return null;
         }
       })
     );
 
-    // Filter out any undefined values (interns where the fields were not filled)
+    // Filter out any null values (interns where the fields were not filled or evaluationFormDetails was null)
     const filteredInternsWithDetails = internsWithDetails.filter(Boolean);
 
     // Send the result in the response
@@ -1147,6 +1121,7 @@ exports.getInternsForManager = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 
 //api to get all the mentors for drop down
 exports.getAllMentors = async (req, res) => {

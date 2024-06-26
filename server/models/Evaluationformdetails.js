@@ -48,7 +48,7 @@ const evaluationFormDetailsSchema = new mongoose.Schema({
   },
   overall_performance_evaluator: {
     type: Number,
-    required: true,
+    required: false,
   },
   action_taken_mentor: { 
     type: String, 

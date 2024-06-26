@@ -95,9 +95,9 @@ router.post('/evaluatorname', middleware.Auth, controller.postEvaluatorName);
 // Route to delete evaluation form details
 router.delete('/deleteeformData', middleware.Auth, controller.deleteeformData);
 // Route to get intern list for relevant mentor
-router.get('/checkMentor/:userId', middleware.Auth,controller. checkMentor);
+router.get('/checkMentor/:userId', middleware.Auth,controller. getInternByMentor);
 // Route to get criteria for mentor
-router.get('/getCriteriaById/:id', middleware.Auth,controller. getCriteriaById);
+// router.get('/getCriteriaById/:id', middleware.Auth,controller. getCriteriaById);
 // Route to store mentor scores of evaluation forms
 router.post('/storeMentorScores/:id', middleware.Auth, controller.storeMentorScoresById);
 // Route to get all the interns for evaluator
@@ -112,7 +112,7 @@ router.get('/getAllMentors', middleware.Auth, controller.getAllMentors);
 router.get('/getReviewDetailsById/:id', middleware.Auth, controller.getReviewDetailsById);
 // Route to get evaluation details of interns by ID (evaluation PDF for interns)
 router.get('/getCommentsById/:id', middleware.Auth, controller.getCommentsById);
-
+ 
 
 /*......................................dilum.......................*/
 
