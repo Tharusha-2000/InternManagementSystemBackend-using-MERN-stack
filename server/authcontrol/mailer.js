@@ -34,9 +34,12 @@ exports.sendingOTPMail = async (req, res) => {
        res.status(500).json({ msg: "server error"});
      } else {
        console.log('Email sent: ' + info.response);
-          res.status(201).send({ msg: "otp send!",code: otp})
+
+       res.status(201).send({ msg: "otp send!",code: otp})
+
      }
     });
+
     } catch (error) {
       console.error(error);
       res.status(500).send({ error: "Internal Server Error" });
@@ -47,7 +50,7 @@ exports.sendingOTPMail = async (req, res) => {
 exports.sendWelcomeEmail = (req, res) => {
   
   try {
-    const { email, password } = res.locals.userData;
+   const { email, password,user } = res.locals.userData;
 
     var transporter = nodemailer.createTransport({
 
@@ -84,10 +87,11 @@ exports.sendWelcomeEmail = (req, res) => {
         } else {
           console.log('Email sent: ' + info.response);
 
-          res.status(201).json({ msg: "User registered successfully", success: true});
+         res.status(201).json({ msg: "User registered successfully",success: true,user:user});
         }
       });
       
+
     }catch (error) {
       console.error(error);
       res.status(500).json({ error: "Internal Server Error" });

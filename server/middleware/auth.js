@@ -127,11 +127,12 @@ async function IsNotIntern(req, res, next){
           .json({ msg: "User not found" });
     }
 
-    if (user.role === "intern") {
+        if (user.role !== "admin"&& user.role !== "mentor" && user.role !== "evaluator" && user.role !== "manager") {
         return res
           .status(403)
           .json({ msg: "You are not authorized to set this data"  });
       }
+          req.user = user;
           next();
 
 }

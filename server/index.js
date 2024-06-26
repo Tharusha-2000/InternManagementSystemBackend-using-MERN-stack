@@ -10,8 +10,10 @@ const userRoute = require("./routes/usersRoute.js");
 const body=require('body-parser');
 const app = express() 
 
+
 const connectDB = require('./utils/db.js');
 connectDB();
+
 
 app.use(cors({
     origin: ["https://imsfrontend.vercel.app"],
