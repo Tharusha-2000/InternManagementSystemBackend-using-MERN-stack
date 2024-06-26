@@ -67,9 +67,11 @@ exports.generateOTP = async (req, res, next) => {
 
       // Store OTP in req.app.locals for later verification if needed
       req.app.locals.OTP = otp;
+
       const otpTimeout = setTimeout(() => {
         req.app.locals.OTP = null;
       }, 1 * 60 * 1000);
+
 
       next();
     }
@@ -142,6 +144,22 @@ exports.getUsers = async (req, res) => {
   }
 };
 
+// Get user by ID
+exports.getUserById= async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'user not found' });
+    }
+
+   
+      res.status(201).json({ success: true, user});
+    
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
  // deleteuser  from the user database
 exports.deleteUser = async (req, res) => {
   try {
@@ -180,6 +198,10 @@ exports.changeRole = async (req, res) => {
     //not necessary
     if (!user) {
       return res.status(404).json("User not found");
+    }
+    
+     if(user.role === role){
+      return res.status(400).json({ msg: "Role is already set to " + role });
     }
     await User.updateOne(
       {
@@ -235,7 +257,7 @@ exports.register = async (req, res, next) => {
 
     console.log(req.data); 
 
-    res.locals.userData = { email, password };
+      res.locals.userData = { email, password , user};
     next();
   } catch (error) {
     console.error(error);
