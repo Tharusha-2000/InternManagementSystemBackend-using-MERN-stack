@@ -16,7 +16,7 @@ connectDB();
 
 
 app.use(cors({
-    origin: ["https://imsfrontend.vercel.app"],
+    origin: ["http://localhost:5173"],
     methods: ['GET','POST','PUT',"DELETE"],
     credentials: true
 }))
@@ -33,11 +33,19 @@ app.use(body.json());
 
 
 
-app.listen(8002, () => {
+app.listen(8004, () => {
       console.log("Server is running")
  })
 
 
+// //using the app object in another file
+// if (require.main === module) {
+//     // This module was run directly from the command line (i.e. this is the main module)
+//     app.listen(8008, () => {
+//       console.log("Server is running")
+//     });
+//   }
 
+  module.exports = app; // Export the app object  
 
 
