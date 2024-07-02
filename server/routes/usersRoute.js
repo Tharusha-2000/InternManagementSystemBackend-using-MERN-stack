@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const EvaluationFormDetails = require("../models/Evaluationformdetails");
 
 
 const controller = require('../authcontrol/controller')
@@ -84,6 +84,7 @@ router.post('/postEvaluatorResultById/:id', middleware.Auth,middleware.IsEvaluat
 
 
 module.exports = router;
+
 
 
 

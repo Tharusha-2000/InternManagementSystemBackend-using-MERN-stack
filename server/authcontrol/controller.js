@@ -1,5 +1,5 @@
 const User = require("../models/user.js");
-const EvaluationFormDetails = require('../models/Evaluationformdetails');
+const EvaluationFormDetails = require("../models/Evaluationformdetails");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const otpGenerator = require("otp-generator");
@@ -49,7 +49,6 @@ exports.login = async (req, res) => {
   }
 };
 
-
 /*generateOTP in 6 digit */
 exports.generateOTP = async (req, res, next) => {
   try {
@@ -72,7 +71,6 @@ exports.generateOTP = async (req, res, next) => {
         req.app.locals.OTP = null;
       }, 1 * 60 * 1000);
 
-
       next();
     }
   } catch (error) {
@@ -81,10 +79,13 @@ exports.generateOTP = async (req, res, next) => {
   }
 };
 
-
 /* verifyOTP that email */
 exports.verifyOTP = async (req, res) => {
   const { code } = req.query;
+
+  const otpTimeout = setTimeout(() => {
+    req.app.locals.OTP = null;
+  }, 1 * 60 * 1000);
 
   if (parseInt(req.app.locals.OTP) === parseInt(code)) {
     req.app.locals.OTP = null; // reset the OTP value
@@ -93,7 +94,6 @@ exports.verifyOTP = async (req, res) => {
   }
   return res.status(400).send({ msg: "Invalid OTP" });
 };
-
 
 /* reset password */
 exports.resetPassword = async (req, res) => {
@@ -131,7 +131,7 @@ exports.resetPassword = async (req, res) => {
 
 /*.............................registation add user table............................*/
 
- // Fetch all users from the user database
+// Fetch all users from the user database
 exports.getUsers = async (req, res) => {
   try {
   
@@ -143,6 +143,7 @@ exports.getUsers = async (req, res) => {
     res.status(500).json("Internal Server Error");
   }
 };
+
 
 // Get user by ID
 exports.getUserById= async (req, res) => {
@@ -161,16 +162,21 @@ exports.getUserById= async (req, res) => {
 };
 
  // deleteuser  from the user database
+
 exports.deleteUser = async (req, res) => {
   try {
     let id = req.params.id;
     const user = await User.findByIdAndDelete(id);
+
      // Delete tasks associated with the user
                  await Task.deleteMany({ _userId: id });   
                  await EvaluationFormDetails.deleteMany({ user: id });  
 
     //if loguser delete him  then active this 
      if (req.data.id === id) {
+
+
+
       return res
         .status(403)
         .json({ msg: "You do not have permission to access this function" });
@@ -236,8 +242,10 @@ exports.changeRole = async (req, res) => {
 //register user
 exports.register = async (req, res, next) => {
   try {
+
  
     const { fname, lname, dob, role, gender, email, password,jobtitle,employmentType,department} = req.body;
+
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res.json({ msg: "User already exists" });
@@ -255,7 +263,7 @@ exports.register = async (req, res, next) => {
       department,
     });
 
-    console.log(req.data); 
+    console.log(req.data);
 
       res.locals.userData = { email, password , user};
     next();
@@ -267,6 +275,7 @@ exports.register = async (req, res, next) => {
 /*..............................create user profile.............................. */
 //read user profile
 exports.getUser = async (req, res) => {
+
   try {  
     const {id} = req.data;
     const user = await User.findById(id);
@@ -296,70 +305,92 @@ exports.updateuser=async (req, res) => {
     } catch (error) {
       console.error(error);
       return res.status(500).send({ error: "Internal Server Error" });
+
     }
-  };
+    if (!id) {
+      return res.status(401).send({ error: "User ID not provided" });
+    }
+    const body = req.body;
+    // Update the data
+    const result = await User.updateOne({ _id: id }, body);
 
-  //upload photo user
-  exports.uploadImageByuser=async (req, res) => {
+    if (result.nModified === 0) {
+      return res
+        .status(404)
+        .send({ error: "User not found or no changes applied" });
+    }
+    return res.status(200).send({ msg: "Record Updated" });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).send({ error: "Internal Server Error" });
+  }
+};
 
-    const { id } = req.data;
-    console.log(req.body);
-    
-        try {
-          const updateduser = await User.findByIdAndUpdate(id, req.body, { new: true });
-          if (!updateduser) {
-            return res.status(404).json({ message: ' user not found' });
-          }
-          res.json({msg:"update successfully", updateduser});
-          
-        } catch (error) {
-          res.status(500).json({ msg: "Internal Server Error" });
-        }
-  
-  };
+//upload photo user
+exports.uploadImageByuser = async (req, res) => {
+  const { id } = req.data;
+  console.log(req.body);
 
-  /*......................................intern table create.......................*/
+  try {
+    const updateduser = await User.findByIdAndUpdate(id, req.body, {
+      new: true,
+    });
+    if (!updateduser) {
+      return res.status(404).json({ message: " user not found" });
+    }
+    res.json({ msg: "update successfully", updateduser });
+  } catch (error) {
+    res.status(500).json({ msg: "Internal Server Error" });
+  }
+};
+
+/*......................................intern table create.......................*/
 // Read Intern Users
 exports.getInternList = async (req, res) => {
   try {
+
   
+
     // Fetch all users from the database
-    const interns = await User.find({ role: 'intern' });
-                   res.status(201).json({ success: true, interns });
-  }catch (err) {
+    const interns = await User.find({ role: "intern" });
+    res.status(201).json({ success: true, interns });
+  } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
 // Get Intern by ID
-exports.getIntern= async (req, res) => {
+exports.getIntern = async (req, res) => {
   try {
     const intern = await User.findById(req.params.id);
+
     if (!intern) {
-      return res.status(404).json({ message: 'Intern not found' });
+      return res.status(404).json({ message: "Intern not found" });
     }
-   
-      res.status(201).json({ success: true, intern});
-    
+
+    res.status(201).json({ success: true, intern });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
 
 // Update Intern User
-exports.updatedIntern= async (req, res) => {
+exports.updatedIntern = async (req, res) => {
   try {
     const { id } = req.params;
 
+
     const updatedIntern = await User.findByIdAndUpdate(id, req.body, { new: true });
+
     if (!updatedIntern) {
-      return res.status(404).json({ message: 'Intern user not found' });
+      return res.status(404).json({ message: "Intern user not found" });
     }
-    res.json({msg:"update successfully", updatedIntern});
+    res.json({ msg: "update successfully", updatedIntern });
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 };
+
 
 
 exports.getAllMentors = async (req, res) => {
@@ -380,16 +411,21 @@ exports.getAllMentors = async (req, res) => {
 
  /*......................................intern profile create.......................*/
 
- exports.updateinternprofile=async (req, res) => {
+
+
+exports.updateinternprofile = async (req, res) => {
   const { id } = req.data;
-  
+
   try {
+
     const body = req.body;
     // Update the data
-    const result = await User.updateOne({ _id: id}, body);
+    const result = await User.updateOne({ _id: id }, body);
 
     if (result.nModified === 0) {
-      return res.status(404).send({ error: "User not found or no changes applied" });
+      return res
+        .status(404)
+        .send({ error: "User not found or no changes applied" });
     }
     return res.status(200).send({ msg: "Record Updated" });
   } catch (error) {
@@ -430,37 +466,41 @@ exports.getInternsWithTasks = async (req, res) => {
 
 exports.getTask=async (req, res)=> {
   const { id } = req.data;
+
   Task.find({
-      _userId:id
-  }).then((tasks) => {
-     res.json(tasks);
-  }).catch((e) => {
+    _userId: id,
+  })
+    .then((tasks) => {
+      res.json(tasks);
+    })
+    .catch((e) => {
       res.json(e);
-  });
+    });
 };
 
-
-exports.createTask=async(req, res) => {
+exports.createTask = async (req, res) => {
   const { id } = req.data;
+
+
   let title = req.body.title;
-  try{
-  const  newTask = new Task({
+  try {
+    const newTask = new Task({
       title,
-      _userId: id
-  });
-   const task=await newTask.save()
-  res.status(201).json(task);
-  }catch(error){
+      _userId: id,
+    });
+    const task = await newTask.save();
+    res.status(201).json(task);
+  } catch (error) {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
-exports.deleteTask= async (req, res) => {
+exports.deleteTask = async (req, res) => {
   try {
   
     let id = req.params.id;
     const task = await Task.findByIdAndDelete(id);
-      
+
     if (!task) {
       return res.status(404).json("task not found");
     }
@@ -483,20 +523,24 @@ exports.updateTask= async (req, res) => {
     const { id } = req.params;
  
     const updatedtask = await Task.findByIdAndUpdate(id, req.body, { new: true });
+
     if (!updatedtask) {
-      return res.status(404).json({ message: 'task not found' });
+      return res.status(404).json({ message: "task not found" });
     }
-    res.json({msg:"update successfully", updatedtask});
+    res.json({ msg: "update successfully", updatedtask });
     console.log(updatedtask);
     console.log(updatedtask.isComplete);
+
     
     if(updatedtask.isComplete){
+
       updatedtask.mentorEmail = mentorEmail;
       await updatedtask.save();
       console.log(mentorEmail);
     }
-    if(!updatedtask.isComplete){
+    if (!updatedtask.isComplete) {
       updatedtask.mentorEmail = null;
+
       await updatedtask.save(); 
      // console.log(updatedtask.mentorEmail);
      }
@@ -506,8 +550,7 @@ exports.updateTask= async (req, res) => {
   }
 };
 
-
-exports.getTasklistMentorNotification= async (req, res) => {
+exports.getTasklistMentorNotification = async (req, res) => {
   try {
     const {email}=req.user;
    // const email = user.email;
@@ -515,24 +558,23 @@ exports.getTasklistMentorNotification= async (req, res) => {
 
     const tasks = await Task.find({ mentorEmail:email, isComplete: true })
                          .populate('_userId');
+
     console.log(tasks);
 
-    
     if (!tasks) {
-      return res.status(404).json({ message: 'task not found' });
+      return res.status(404).json({ message: "task not found" });
     }
     res.json(tasks);
-   
-   } catch (err) {
-     res.status(500).json({ message: err.message });
-   }
-  
-}
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
-exports.getTaskVarify= async (req, res) => {
-  const id= req.params.id;
+exports.getTaskVarify = async (req, res) => {
+  const id = req.params.id;
   console.log(id);
   try {
+
   
    const varifytask = await Task.findByIdAndUpdate(id, req.body, { new: true });
    if (!varifytask) {
@@ -548,20 +590,27 @@ exports.getTaskVarify= async (req, res) => {
  } catch (err) {
    res.status(500).json({ message: err.message });
  }
+
 };
 
-exports.getTaskIntern=async (req, res)=> {
+exports.getTaskIntern = async (req, res) => {
   const { id } = req.params;
+
   
+
   Task.find({
-      _userId:id
-  }).then((tasks) => {
-     res.json(tasks);
-  }).catch((e) => {
+    _userId: id,
+  })
+    .then((tasks) => {
+      res.json(tasks);
+    })
+    .catch((e) => {
       res.send(e);
+
   });
 
   
+
 };
 
 
@@ -599,6 +648,7 @@ exports.secure = async (req, res) => {
 };
 
 /*......................................cv upload.......................*/
+
 
    //upload cv user
    exports.uploadcvByAdmin=async (req, res) => {
@@ -835,11 +885,16 @@ exports.getEvInterns = async (req, res) => {
 exports.getEvaluators = async (req, res) => {
   try {
 
-// Find all users where role is 'evaluator' or 'evaluator ' and only return the fname and lname fields
-const evaluators = await User.find({ role: { $in: ['evaluator', 'evaluator '] } }, 'fname lname').lean();
+    // Find all users where role is 'evaluator' or 'evaluator ' and only return the fname and lname fields
+    const evaluators = await User.find(
+      { role: { $in: ["evaluator", "evaluator "] } },
+      "fname lname"
+    ).lean();
 
     // Map over the evaluators and combine the fname and lname fields into a single name field
-    const evaluatorNames = evaluators.map(evaluator => evaluator.fname + ' ' + evaluator.lname);
+    const evaluatorNames = evaluators.map(
+      (evaluator) => evaluator.fname + " " + evaluator.lname
+    );
 
     // Send the evaluator names in the response
     res.json(evaluatorNames);
@@ -849,46 +904,59 @@ const evaluators = await User.find({ role: { $in: ['evaluator', 'evaluator '] } 
   }
 };
 
-
-
 //post evalutor name into evaluation form details collection
 exports.postEvaluatorName = async (req, res) => {
   try {
-    const { id, evaluatorName, jobPerformanceCriteriasEvaluator, coreValuesCriteriasEvaluator, jobPerformanceCriteriasMentor, coreValuesCriteriasMentor, evaluateBefore } = req.body;
-  
+    const {
+      id,
+      evaluatorName,
+      jobPerformanceCriteriasEvaluator,
+      coreValuesCriteriasEvaluator,
+      jobPerformanceCriteriasMentor,
+      coreValuesCriteriasMentor,
+      evaluateBefore,
+    } = req.body;
+
     // Check if all the fields are filled
-    const allFieldsFilled = evaluatorName && jobPerformanceCriteriasEvaluator && coreValuesCriteriasEvaluator && jobPerformanceCriteriasMentor && coreValuesCriteriasMentor && evaluateBefore;
+    const allFieldsFilled =
+      evaluatorName &&
+      jobPerformanceCriteriasEvaluator &&
+      coreValuesCriteriasEvaluator &&
+      jobPerformanceCriteriasMentor &&
+      coreValuesCriteriasMentor &&
+      evaluateBefore;
 
     // Log evaluateBefore
-    console.log('evaluateBefore:', evaluateBefore);
+    console.log("evaluateBefore:", evaluateBefore);
 
     // Log the request body
-    console.log('Request body:', req.body);
-  
+    console.log("Request body:", req.body);
+
     // Find the EvaluationFormDetails document with the given ObjectId and update it
-    const updatedDocument = await EvaluationFormDetails.findByIdAndUpdate(id, 
-      { 
-        evaluator: evaluatorName, 
+    const updatedDocument = await EvaluationFormDetails.findByIdAndUpdate(
+      id,
+      {
+        evaluator: evaluatorName,
         job_performance_criterias_evaluator: jobPerformanceCriteriasEvaluator,
         core_values_criterias_evaluator: coreValuesCriteriasEvaluator,
         job_performance_criterias_mentor: jobPerformanceCriteriasMentor,
         core_values_criterias_mentor: coreValuesCriteriasMentor,
         evaluate_before: evaluateBefore ? new Date(evaluateBefore) : undefined,
-        eformstates: allFieldsFilled ? 'created' : 'not created'
-      }, 
-      { new: true }).lean();
-  
+        eformstates: allFieldsFilled ? "created" : "not created",
+      },
+      { new: true }
+    ).lean();
+
     // Send the updated document in the response
     res.json(updatedDocument);
   } catch (err) {
     // Log the error details
-    console.error('Error details:', err);
-  
+    console.error("Error details:", err);
+
     // Send an error response if something goes wrong
     res.status(500).json({ error: err.message });
   }
 };
-
 
 // Delete all the data from the specified fields and set them to their default values
 exports.deleteeformData = async (req, res) => {
@@ -896,46 +964,118 @@ exports.deleteeformData = async (req, res) => {
     const { id } = req.body;
 
     // Find the EvaluationFormDetails document with the given ObjectId and update it
-    const updatedDocument = await EvaluationFormDetails.findByIdAndUpdate(id, 
-      { 
-        evaluator: '', // Set evaluator to its default value
-        job_performance_criterias_evaluator: [], // Set job_performance_criterias_evaluator to its default value
-        core_values_criterias_evaluator: [], // Set core_values_criterias_evaluator to its default value
-        job_performance_criterias_mentor: [], // Set job_performance_criterias_mentor to its default value
-        core_values_criterias_mentor: [], // Set core_values_criterias_mentor to its default value
-        job_performance_scores_evaluator: [], // Set job_performance_scores_evaluator to its default value
-        core_values_scores_evaluator: [], // Set core_values_scores_evaluator to its default value
-        job_performance_scores_mentor: [], // Set job_performance_scores_mentor to its default value
-        core_values_scores_mentor: [], // Set core_values_scores_mentor to its default value
-        overall_performance_mentor: null, // Set overall_performance_mentor to its default value
-        overall_performance_evaluator: null, // Set overall_performance_evaluator to its default value
-        action_taken_mentor: '', // Set action_taken_mentor to its default value
-        comment_evaluator: '', // Set comment_evaluator to its default value
-        comment_mentor: '', // Set comment_mentor to its default value
-        evaluate_before: null, // Set evaluate_before to its default value
-        evaluated_date_Evaluator: null, // Set evaluated_date_Evaluator to its default value
-        evaluated_date_Mentor: null, // Set evaluated_date_Mentor to its default value
-        eformstates: 'not created' // Set eformstates to 'not created'
-      }, 
-      { new: true }).lean();
-  
+    const updatedDocument = await EvaluationFormDetails.findByIdAndUpdate(
+      id,
+      {
+        evaluator: "", 
+        job_performance_criterias_evaluator: [], 
+        core_values_criterias_evaluator: [], 
+        job_performance_criterias_mentor: [],
+        core_values_criterias_mentor: [], 
+        job_performance_scores_evaluator: [], 
+        core_values_scores_evaluator: [], 
+        job_performance_scores_mentor: [], 
+        core_values_scores_mentor: [], 
+        overall_performance_mentor: null, 
+        overall_performance_evaluator: null, 
+        action_taken_mentor: "", 
+        comment_evaluator: "", 
+        comment_mentor: "", 
+        evaluate_before: null, 
+        evaluated_date_Evaluator: null, 
+        evaluated_date_Mentor: null, 
+        eformstates: "not created", 
+      },
+      { new: true }
+    ).lean();
+
     // Send the updated document in the response
     res.json(updatedDocument);
   } catch (err) {
     // Log the error details
-    console.error('Error details:', err);
-  
+    console.error("Error details:", err);
+
     // Send an error response if something goes wrong
     res.status(500).json({ error: err.message });
   }
 };
 
+/*......................................mmentors page apis.......................*/
+exports.getInternByMentor = async (req, res) => {
+  try {
+    // Get the logged-in user's id from the request parameters
+    const userId = req.params.userId;
 
+    // Find the User document with the given id
+    const user = await User.findById(userId).lean();
 
+    // Get the full name of the logged-in user
+    const fullName = user.fname + " " + user.lname;
 
+    // Find all User documents where mentor is the logged-in user
+    const users = await User.find({ mentor: fullName }).lean();
 
+    // For each user, find the related EvaluationFormDetails document where eformstates is 'created'
+    const mentorDetails = [];
+    for (let user of users) {
+      const evaluationFormDetails = await EvaluationFormDetails.find({
+        eformstates: "created",
+        user: user._id,
+      }).lean();
+      for (let doc of evaluationFormDetails) {
+        const isMentorFormFilled =
+          (doc.job_performance_scores_mentor?.length || 0) > 0 &&
+          (doc.core_values_scores_mentor?.length || 0) > 0 &&
+          doc.overall_performance_mentor > 0 &&
+          doc.action_taken_mentor !== "" &&
+          doc.comment_mentor !== "";
+        mentorDetails.push({
+          internName: user.fname + " " + user.lname,
+          evaluateBefore: doc.evaluate_before,
+          eformstates: doc.eformstates,
+          jobPerformanceCriteriasEvaluator: doc.job_performance_criterias_evaluator,
+          coreValuesCriteriasEvaluator: doc.core_values_criterias_evaluator,
+          jobPerformanceCriteriasMentor: doc.job_performance_criterias_mentor,
+          coreValuesCriteriasMentor: doc.core_values_criterias_mentor,
+          evaluator: doc.evaluator,
+          internId: doc._id,
+          isMentorFormFilled: isMentorFormFilled,
+          imageUrl: user.imageUrl // Include imageUrl from the user object
+        });
+      }
+    }
 
+    // Send the result in the response
+    res.json(mentorDetails);
+  } catch (err) {
+    // Log the error details
+    console.error("Error details:", err);
 
+    // Send an error response if something goes wrong
+    res.status(500).json({ error: err.message });
+  }
+};
+// exports.getCriteriaById = async (req, res) => {
+//   try {
+//     // Get the ID from the request parameters
+//     const id = req.params.id;
+
+//     // Find the EvaluationFormDetails document with the provided ID and only return the job_performance_criterias_mentor and core_values_criterias_mentor fields
+//     const evaluationFormDetails = await EvaluationFormDetails.findById(
+//       id,
+//       "job_performance_criterias_mentor core_values_criterias_mentor"
+//     ).lean();
+
+//     // Send the result in the response
+//     res.json(evaluationFormDetails);
+//   } catch (err) {
+//     // Log the error details
+//     console.error("Error details:", err);
+
+//     // Send an error response if something goes wrong
+//     res.status(500).json({ error: err.message });
+//   }
+// };
 
 
   /*......................................mmentors page apis.......................*/
@@ -994,54 +1134,27 @@ exports.deleteeformData = async (req, res) => {
 
   
 
-  //this api to store mentor submiting details.
 
-  exports.storeMentorScoresById = async (req, res) => {
-    const { 
-      coreValuesScoresMentor, 
-      jobPerformanceScoresMentor, 
-      overall_performance_mentor = null, 
-      action_taken_mentor = null, 
-      comment_mentor = null 
-    } = req.body;
-    const { id } = req.params; // Get the ID from the URL parameters
-  
-    try {
-      // Find the document for the intern
-      let evaluationFormDetails = await EvaluationFormDetails.findById(id);
-  
-      // If the document doesn't exist, return an error
-      if (!evaluationFormDetails) {
-        return res.status(404).json({ message: 'No evaluation form found for this intern' });
-      }
-  
-      // Update the scores
-      evaluationFormDetails.core_values_scores_mentor = coreValuesScoresMentor;
-      evaluationFormDetails.job_performance_scores_mentor = jobPerformanceScoresMentor;
-      evaluationFormDetails.overall_performance_mentor = overall_performance_mentor;
-      evaluationFormDetails.action_taken_mentor = action_taken_mentor;
-      evaluationFormDetails.comment_mentor = comment_mentor;
-  
-      // Store the current date as the evaluated_date_Mentor
-      evaluationFormDetails.evaluated_date_Mentor = new Date();
-  
-      // Save the document
-      await evaluationFormDetails.save();
-  
-      res.json({ message: 'Scores stored successfully' });
-    } catch (err) {
-      console.error(err.message);
-      res.status(500).send(`Server error: ${err.message}`);
-    }
-  };
+//this api to store mentor submiting details.
+
+exports.storeMentorScoresById = async (req, res) => {
+  const {
+    coreValuesScoresMentor,
+    jobPerformanceScoresMentor,
+    overall_performance_mentor = null,
+    action_taken_mentor = null,
+    comment_mentor = null,
+  } = req.body;
+  const { id } = req.params; // Get the ID from the URL parameters
 
 
-//evaluator backend apis
+
 
 exports.getInternsByEvaluator = async (req, res) => {
   try {
     const {id }=req.data;
     const evaluator = await User.findById(id).lean();
+
 
     const evaluatorName = evaluator.fname + " " + evaluator.lname;
     const evaluationFormDetails = await EvaluationFormDetails.find({ evaluator: evaluatorName }).lean();
@@ -1070,10 +1183,13 @@ exports.getInternsByEvaluator = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
 exports.getInternsForManager = async (req, res) => {
+
   try {
     // Find all User documents where role is 'intern'
     const interns = await User.find({ role: "intern" }).lean();
+
 
     // For each intern, find the corresponding EvaluationFormDetails document
     const internsWithDetails = await Promise.all(
@@ -1115,6 +1231,7 @@ exports.getInternsForManager = async (req, res) => {
           return null;
         }
       })
+
     );
 
     // Filter out any null values (interns where the fields were not filled or evaluationFormDetails was null)
@@ -1126,8 +1243,10 @@ exports.getInternsForManager = async (req, res) => {
     // Log the error details
     console.error("Error details:", err);
 
+
     // Send an error response if something goes wrong
     res.status(500).json({ error: err.message });
+
   }
 };
 
@@ -1135,6 +1254,7 @@ exports.getInternsForManager = async (req, res) => {
 //intern evaluation pdf generate
 exports.getCommentsById = async (req, res) => {
   try {
+
     const { id } = req.data;
 
   
@@ -1174,6 +1294,7 @@ exports.getReviewDetailsById = async (req, res) => {
       "job_performance_criterias_evaluator core_values_criterias_evaluator job_performance_criterias_mentor core_values_criterias_mentor job_performance_scores_evaluator core_values_scores_evaluator job_performance_scores_mentor core_values_scores_mentor overall_performance_mentor overall_performance_evaluator action_taken_mentor comment_evaluator comment_mentor evaluated_date_Evaluator evaluated_date_Mentor"
     );
 
+
     if (!evaluationDetails) {
       return res
         .status(404)
@@ -1186,6 +1307,7 @@ exports.getReviewDetailsById = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 exports.storeEvaluatorResultById = async (req, res) => {
   try {
     const id = req.params.id; // Intern's ID
@@ -1194,6 +1316,7 @@ exports.storeEvaluatorResultById = async (req, res) => {
     const evaluationFormDetails = await EvaluationFormDetails.findById(
       id
     ).lean();
+
 
     // Check if the EvaluationFormDetails exists
     if (!evaluationFormDetails) {
@@ -1220,6 +1343,7 @@ exports.storeEvaluatorResultById = async (req, res) => {
   } catch (err) {
     // Log the error details
     console.error("Error details:", err);
+
     res
       .status(500)
       .json({ error: "An error occurred while updating the evaluation form" });
@@ -1230,6 +1354,9 @@ exports.storeEvaluatorResultById = async (req, res) => {
 
 
 
+
+
+/*......................................hansi.......................*/
 
 
   /*......................................hansi.......................*/

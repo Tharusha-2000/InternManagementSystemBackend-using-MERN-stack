@@ -8,8 +8,6 @@ const connectDB = async() => {
                useUnifiedTopology: true,
                useNewUrlParser: true,
 
-
-
             })
             console.log('mongodb connection SUCCESS');
         } catch (error) {
