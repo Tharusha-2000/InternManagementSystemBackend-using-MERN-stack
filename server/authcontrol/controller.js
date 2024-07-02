@@ -613,6 +613,7 @@ exports.getTaskIntern = async (req, res) => {
 
 };
 
+
 //secure password
 exports.secure = async (req, res) => {
   const { id } = req.data;
@@ -780,13 +781,20 @@ exports.getLeaveApplications = async (req, res) => {
 
 
 exports.updateLeaveStatus = async (req, res) => {
- 
+  const {id}=req.data;
   const {userId,leaveApplicationId, status } = req.body;
   try {
   const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
+
+    if(id===userId){
+      return res.status(403).json({ message: 'You do not have permission to access this function' });
+    }
+    
+
+
 
    const leaveApplication = user.leaveApplications.id(leaveApplicationId);
     if (!leaveApplication) {

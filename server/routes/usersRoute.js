@@ -35,20 +35,21 @@ router.get('/taskNotify',middleware.Auth,middleware.IsMentor,controller.getTaskl
 router.put('/taskVerify/:id',middleware.Auth,middleware.IsMentor,controller.getTaskVarify);
 router.get('/task/:id',middleware.Auth,middleware.IsNotIntern,controller.getTaskIntern);
 
+/*..........................................get intern list ................................................ */
+router.get('/interns', middleware.Auth,middleware.IsNotIntern,controller.getInternList);
 /*..........................................profile create................................................. */
+router.put('/uploadImage',middleware.Auth,middleware.IsUser,controller.uploadImageByuser);
 
 router.get('/user',middleware.Auth,middleware.IsUser,controller.getUser);
 router.put("/updateuser",middleware.Auth,middleware.IsNotIntern,controller.updateuser);
-router.put('/uploadImage',middleware.Auth,middleware.IsUser,controller.uploadImageByuser);
-
 
 /*..........................................SendeEmailToUsers................................................ */
 router.post("/sendUserToEmail",middleware.Auth,middleware.IsUser,controller.sendEmailToUsers,mailer.sendEmail);
+
 /*..........................................secure................................................. */
 router.put('/secure',middleware.Auth,middleware.IsUser,controller.secure);
-/*..........................................create intren profile................................................ */
 
-router.get('/interns', middleware.Auth,middleware.IsNotIntern,controller.getInternList);
+/*..........................................create intren profile................................................ */
 router.get('/interns/:id', middleware.Auth,middleware.IsNotIntern,controller.getIntern);
 router.put('/interns/:id',middleware.Auth,middleware.IsAdmin,controller.updatedIntern);
 router.put('/updateinterns',middleware.Auth,middleware.IsIntern,controller.updateinternprofile);
