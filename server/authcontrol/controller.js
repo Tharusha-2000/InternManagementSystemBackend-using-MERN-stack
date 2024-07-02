@@ -950,12 +950,6 @@ exports.deleteeformData = async (req, res) => {
 
 
 
-
-
-
-
-
-
   /*......................................mmentors page apis.......................*/
 
   exports.getInternBymentor = async (req, res) => {
@@ -1245,6 +1239,6 @@ exports.storeEvaluatorResultById = async (req, res) => {
 };
 
 
-  /*......................................hansi.......................*/
+
 
 
