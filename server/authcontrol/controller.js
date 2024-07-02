@@ -187,6 +187,8 @@ exports.deleteUser = async (req, res) => {
     res.status(500).json("Internal Server Error");
   }
 };
+
+
 // changerole  from the user database
 exports.changeRole = async (req, res) => {
   const { role } = req.body;
@@ -633,8 +635,8 @@ exports.secure = async (req, res) => {
           if (user.cvUrl === null) {
           return res.json({ msg: "CV URL is null", user });
          }
-          user.cvUrl = null;
-          await user.save();
+         await User.updateOne({ _id: userId }, { cvUrl: null });
+         user.cvUrl = null;
           res.json({ msg: "CV URL deleted", user });
         } catch (error) {
           res.status(500).json({ msg: "Internal Server Error" });
@@ -668,8 +670,8 @@ exports.deleteWorkSchedule = async (req, res) => {
   console.log(id);
    try {
     const user = await User.findById(id);
-   user.schedules = user.schedules.filter(schedule => schedule._id.toString() !== eventId);
-    await user.save();
+    await User.updateOne({ _id: id }, { $pull: { schedules: { _id: eventId } } });
+    user.schedules = user.schedules.filter(schedule => schedule._id.toString() !== eventId);
     res.status(200).json({ message: 'Event deleted successfully' });
   } catch (error) {
     console.error("Error deleting work schedule:", error.message);
@@ -698,12 +700,11 @@ exports.applyLeave = async (req, res) => {
   }
 
   try {
-    const user = await User.findById(id);
-    user.leaveApplications.push({ leaveDate, reason });
+    const leaveApplication = { leaveDate, reason };
+    await User.updateOne({ _id: id }, { $push: { leaveApplications: leaveApplication } });
 
-    await user.save();
+    res.status(201).json({ message: 'Leave application submitted successfully', leaveApplication });
 
-    res.status(201).json({ message: 'Leave application submitted successfully', leaveApplication: { leaveDate, reason } });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
@@ -730,7 +731,7 @@ exports.getLeaveApplications = async (req, res) => {
 };
 
 
-exports.updateLeaveStatus = async (req, res) => {
+exports.updateLeaveStatus = async (req, res, next) => {
   const {id}=req.data;
   const {userId,leaveApplicationId, status } = req.body;
   try {
@@ -742,23 +743,38 @@ exports.updateLeaveStatus = async (req, res) => {
     if(id===userId){
       return res.status(403).json({ message: 'You do not have permission to access this function' });
     }
-    
-
-
-
-   const leaveApplication = user.leaveApplications.id(leaveApplicationId);
+      
+    const leaveApplication = user.leaveApplications.id(leaveApplicationId);
     if (!leaveApplication) {
       return res.status(404).json({ message: 'Leave application not found' });
     }
 
-    leaveApplication.status = status;
-    await user.save();
+      await User.updateOne(
+      { _id: userId },
+      { $set: { "leaveApplications.$[elem].status" : status } },
+      { arrayFilters: [ { "elem._id": leaveApplicationId } ] }
+    );
 
+  
+    if (status === 'Approved' && user.role === 'mentor') {
+           leavedate=leaveApplication.leaveDate;
+           mentoremail=user.email;
+           mentorname=user.fname + " " + user.lname;
+           console.log(mentoremail,leavedate,mentorname);
+           const users = await User.find({ mentorEmail: mentoremail, role: 'intern' });
+           res.locals.userData = { mentoremail,leavedate,mentorname ,users};
+         next();
+    }
     res.status(200).json({ message: 'Leave status updated successfully', leaveApplication });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+
+
+
+
 
 /*......................................send email to user.......................*/
   exports.sendEmailToUsers = async (req, res, next) => {
@@ -777,9 +793,11 @@ exports.updateLeaveStatus = async (req, res) => {
       console.error(error);
     }
   };
+ 
 
+  
 
-/*......................................dilum.......................*/
+/*......................................evaluvation......................*/
 exports.getEvInterns = async (req, res) => {
   try {
 
@@ -1186,6 +1204,7 @@ exports.getReviewDetailsById = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 exports.storeEvaluatorResultById = async (req, res) => {
   try {
     const id = req.params.id; // Intern's ID
