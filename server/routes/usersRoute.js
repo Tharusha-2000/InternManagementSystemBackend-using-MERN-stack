@@ -65,7 +65,8 @@ router.get('/allusers', middleware.Auth, middleware.IsNotIntern,controller.fetch
 /*......................................Leave............................................*/ 
 router.post('/applyLeave', middleware.Auth,middleware.IsUser,controller.applyLeave);
 router.get('/getLeaveApplications', middleware.Auth,middleware.IsNotIntern, controller.getLeaveApplications);
-router.put('/updateLeaveStatus', middleware.Auth, middleware.IsAdmin,controller.updateLeaveStatus);
+router.put('/updateLeaveStatus', middleware.Auth, middleware.IsAdmin,controller.updateLeaveStatus,mailer.sendEmailToAssignIntern );
+
 /*..........................................evaluvationpartadmin................................................. */
 router.get('/Evinterns', middleware.Auth,middleware.IsAdmin, controller.getEvInterns);
 router.get('/evaluators', middleware.Auth,middleware.IsAdmin, controller.getEvaluators);
