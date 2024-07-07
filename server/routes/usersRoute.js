@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-
+const EvaluationFormDetails = require("../models/Evaluationformdetails");
 
 
 const controller = require('../authcontrol/controller')
@@ -18,6 +18,7 @@ router.put("/resetPassword",controller.resetPassword);
 
 /*..........................................registration.................................................... */
 router.get('/users',middleware.Auth,middleware.IsAdmin,controller.getUsers);
+router.get('/user/:id',middleware.Auth,middleware.IsAdmin,controller.getUserById);
 router.delete('/users/:id',middleware.Auth,middleware.IsAdmin,controller.deleteUser);
 router.put('/users/:id',middleware.Auth,middleware.IsAdmin,controller.changeRole);
 router.post("/register",middleware.Auth,middleware.IsAdmin,controller.register,mailer.sendWelcomeEmail);
@@ -34,20 +35,21 @@ router.get('/taskNotify',middleware.Auth,middleware.IsMentor,controller.getTaskl
 router.put('/taskVerify/:id',middleware.Auth,middleware.IsMentor,controller.getTaskVarify);
 router.get('/task/:id',middleware.Auth,middleware.IsNotIntern,controller.getTaskIntern);
 
+/*..........................................get intern list ................................................ */
+router.get('/interns', middleware.Auth,middleware.IsNotIntern,controller.getInternList);
 /*..........................................profile create................................................. */
+router.put('/uploadImage',middleware.Auth,middleware.IsUser,controller.uploadImageByuser);
 
 router.get('/user',middleware.Auth,middleware.IsUser,controller.getUser);
 router.put("/updateuser",middleware.Auth,middleware.IsNotIntern,controller.updateuser);
-router.put('/uploadImage',middleware.Auth,middleware.IsUser,controller.uploadImageByuser);
-
 
 /*..........................................SendeEmailToUsers................................................ */
 router.post("/sendUserToEmail",middleware.Auth,middleware.IsUser,controller.sendEmailToUsers,mailer.sendEmail);
+
 /*..........................................secure................................................. */
 router.put('/secure',middleware.Auth,middleware.IsUser,controller.secure);
-/*..........................................create intren profile................................................ */
 
-router.get('/interns', middleware.Auth,middleware.IsNotIntern,controller.getInternList);
+/*..........................................create intren profile................................................ */
 router.get('/interns/:id', middleware.Auth,middleware.IsNotIntern,controller.getIntern);
 router.put('/interns/:id',middleware.Auth,middleware.IsAdmin,controller.updatedIntern);
 router.put('/updateinterns',middleware.Auth,middleware.IsIntern,controller.updateinternprofile);
@@ -63,7 +65,8 @@ router.get('/allusers', middleware.Auth, middleware.IsNotIntern,controller.fetch
 /*......................................Leave............................................*/ 
 router.post('/applyLeave', middleware.Auth,middleware.IsUser,controller.applyLeave);
 router.get('/getLeaveApplications', middleware.Auth,middleware.IsNotIntern, controller.getLeaveApplications);
-router.put('/updateLeaveStatus', middleware.Auth, middleware.IsManager,controller.updateLeaveStatus);
+router.put('/updateLeaveStatus', middleware.Auth, middleware.IsAdmin,controller.updateLeaveStatus,mailer.sendEmailToAssignIntern );
+
 /*..........................................evaluvationpartadmin................................................. */
 router.get('/Evinterns', middleware.Auth,middleware.IsAdmin, controller.getEvInterns);
 router.get('/evaluators', middleware.Auth,middleware.IsAdmin, controller.getEvaluators);
@@ -82,6 +85,7 @@ router.post('/postEvaluatorResultById/:id', middleware.Auth,middleware.IsEvaluat
 
 
 module.exports = router;
+
 
 
 

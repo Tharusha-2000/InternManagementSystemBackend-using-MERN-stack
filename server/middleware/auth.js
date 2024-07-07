@@ -108,7 +108,7 @@ async function IsEvaluatorORIsMentor(req, res, next){
     const {id} =req.data;
     const user = await User.findById(id);
 
-    if (user.role !== "evaluvator" && user.role !== "mentor") {
+    if (user.role !== "evaluator" && user.role !== "mentor" && user.role !== "admin") {
         return res
           .status(403)
           .json({ msg: "You do not have permission to access this function" });
@@ -127,11 +127,12 @@ async function IsNotIntern(req, res, next){
           .json({ msg: "User not found" });
     }
 
-    if (user.role === "intern") {
+        if (user.role !== "admin"&& user.role !== "mentor" && user.role !== "evaluator" && user.role !== "manager") {
         return res
           .status(403)
           .json({ msg: "You are not authorized to set this data"  });
       }
+          req.user = user;
           next();
 
 }
