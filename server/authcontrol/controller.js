@@ -1179,7 +1179,7 @@ exports.getReviewDetailsById = async (req, res) => {
     const { id } = req.params;
     const evaluationDetails = await EvaluationFormDetails.findOne(
       { _id: id },
-      "job_performance_criterias_evaluator core_values_criterias_evaluator job_performance_criterias_mentor core_values_criterias_mentor job_performance_scores_evaluator core_values_scores_evaluator job_performance_scores_mentor core_values_scores_mentor overall_performance_mentor overall_performance_evaluator action_taken_mentor comment_evaluator comment_mentor evaluated_date_Evaluator evaluated_date_Mentor"
+        "job_performance_criterias_evaluator core_values_criterias_evaluator job_performance_criterias_mentor core_values_criterias_mentor job_performance_scores_evaluator core_values_scores_evaluator job_performance_scores_mentor core_values_scores_mentor overall_performance_mentor overall_performance_evaluator action_taken_mentor comment_evaluator comment_mentor evaluated_date_Evaluator evaluated_date_Mentor evaluator evaluator_email  evaluate_before"
     );
 
     if (!evaluationDetails) {
