@@ -18,6 +18,14 @@ const evaluationFormDetailsSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  evaluator_email: {
+    type: String,
+    required: false,
+  },
+  evaluator_id: {
+    type: String,
+    required: false,
+  },
   job_performance_criterias_evaluator: {
     type: [String],
   },
@@ -75,6 +83,7 @@ const evaluationFormDetailsSchema = new mongoose.Schema({
     type: Date,
     required: false,
   },
+
 });
 
 const Evaluationformdetails = mongoose.model(

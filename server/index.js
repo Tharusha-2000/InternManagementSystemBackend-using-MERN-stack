@@ -33,15 +33,15 @@ app.use(body.json());
 
 
 
-app.listen(8005, () => {
+app.listen(8007, () => {
    console.log("Server is running")
  })
 
 
-// //using the app object in another file
+//using the app object in another file
 // if (require.main === module) {
 //     // This module was run directly from the command line (i.e. this is the main module)
-//     app.listen(8008, () => {
+//     app.listen(8007, () => {
 //       console.log("Server is running")
 //     });
 //   }

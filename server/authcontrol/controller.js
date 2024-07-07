@@ -197,9 +197,14 @@ exports.changeRole = async (req, res) => {
    
     //console.log(id);
     const user = await User.findById(id);
+
     //not necessary
     if (!user) {
       return res.status(404).json("User not found");
+    }
+    
+    if (req.data.id === id) {
+      return res.status(403).json({ msg: "You cannot change your own role" });
     }
     
      if(user.role === role){
@@ -216,13 +221,7 @@ exports.changeRole = async (req, res) => {
       }
     );
 
-    if (req.data.id === id) {
-      if (role !== "admin") {
-        return res
-          .status(403)
-          .json({ msg: "You do not have permission to access this function" });
-      }
-    }
+ 
 
     return res.status(201).json({ msg: "Record Updated...!" });
   } catch (err) {
@@ -442,18 +441,20 @@ exports.getTask=async (req, res)=> {
 };
 
 
-exports.createTask=async(req, res) => {
+exports.createTask=async(req, res) =>{
   const { id } = req.data;
   let title = req.body.title;
+  
   try{
-  const  newTask = new Task({
-      title,
+    const task = await Task.create({
+      title: title,
       _userId: id
-  });
-   const task=await newTask.save()
+    });
+    console.log(task);
   res.status(201).json(task);
   }catch(error){
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(400).json({ error: error.message });
+   
   }
 };
 
@@ -504,6 +505,7 @@ exports.updateTask= async (req, res) => {
      }
 
   } catch (err) {
+   
     res.status(400).json({ message: err.message });
   }
 };
@@ -772,10 +774,6 @@ exports.updateLeaveStatus = async (req, res, next) => {
 };
 
 
-
-
-
-
 /*......................................send email to user.......................*/
   exports.sendEmailToUsers = async (req, res, next) => {
     const { email, subject, message } = req.body;
@@ -849,33 +847,31 @@ exports.getEvInterns = async (req, res) => {
   }
 };
 
-//get all the evaluators for evaluation form dropdown
 exports.getEvaluators = async (req, res) => {
   try {
+    // Find all users where role is 'evaluator' and only return the _id, fname, lname, and email fields
+    const evaluators = await User.find({ role: { $in: ['evaluator'] } }, '_id fname lname email').lean();
 
-// Find all users where role is 'evaluator' or 'evaluator ' and only return the fname and lname fields
-const evaluators = await User.find({ role: { $in: ['evaluator', 'evaluator '] } }, 'fname lname').lean();
+    // Map over the evaluators and combine the _id, fname, lname, and email fields
+    const evaluatorDetails = evaluators.map(evaluator => ({
+      id: evaluator._id, // Include the user ID
+      name: evaluator.fname + ' ' + evaluator.lname,
+      email: evaluator.email
+    }));
 
-    // Map over the evaluators and combine the fname and lname fields into a single name field
-    const evaluatorNames = evaluators.map(evaluator => evaluator.fname + ' ' + evaluator.lname);
-
-    // Send the evaluator names in the response
-    res.json(evaluatorNames);
+    // Send the evaluator details in the response
+    res.json(evaluatorDetails);
   } catch (err) {
     // Send an error response if something goes wrong
     res.status(500).json({ error: err.message });
   }
 };
 
-
-
-//post evalutor name into evaluation form details collection
 exports.postEvaluatorName = async (req, res) => {
   try {
-    const { id, evaluatorName, jobPerformanceCriteriasEvaluator, coreValuesCriteriasEvaluator, jobPerformanceCriteriasMentor, coreValuesCriteriasMentor, evaluateBefore } = req.body;
-  
+    const { id, evaluatorName, evaluatorEmail, evaluatorId, jobPerformanceCriteriasEvaluator, coreValuesCriteriasEvaluator, jobPerformanceCriteriasMentor, coreValuesCriteriasMentor, evaluateBefore } = req.body;
     // Check if all the fields are filled
-    const allFieldsFilled = evaluatorName && jobPerformanceCriteriasEvaluator && coreValuesCriteriasEvaluator && jobPerformanceCriteriasMentor && coreValuesCriteriasMentor && evaluateBefore;
+    const allFieldsFilled = evaluatorName && evaluatorEmail && jobPerformanceCriteriasEvaluator && coreValuesCriteriasEvaluator && jobPerformanceCriteriasMentor && coreValuesCriteriasMentor && evaluateBefore;
 
     // Log evaluateBefore
     console.log('evaluateBefore:', evaluateBefore);
@@ -886,7 +882,9 @@ exports.postEvaluatorName = async (req, res) => {
     // Find the EvaluationFormDetails document with the given ObjectId and update it
     const updatedDocument = await EvaluationFormDetails.findByIdAndUpdate(id, 
       { 
-        evaluator: evaluatorName, 
+        evaluator: evaluatorName,
+        evaluator_email: evaluatorEmail, // Add this line to include the evaluator's email
+        evaluator_id: evaluatorId, 
         job_performance_criterias_evaluator: jobPerformanceCriteriasEvaluator,
         core_values_criterias_evaluator: coreValuesCriteriasEvaluator,
         job_performance_criterias_mentor: jobPerformanceCriteriasMentor,
@@ -906,7 +904,6 @@ exports.postEvaluatorName = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
-
 
 // Delete all the data from the specified fields and set them to their default values
 exports.deleteeformData = async (req, res) => {
@@ -951,17 +948,16 @@ exports.deleteeformData = async (req, res) => {
 
 
   /*......................................mmentors page apis.......................*/
-
   exports.getInternBymentor = async (req, res) => {
     try {
       const { id } = req.data;
       const user = await User.findById(id).lean();
   
-      // Get the full name of the logged-in user
-      const fullName = user.fname + " " + user.lname;
+      // Use the email of the logged-in user instead of the full name
+      const mentorEmail = user.email;
   
-      // Find all User documents where mentor is the logged-in user
-      const users = await User.find({ mentor: fullName }).lean();
+      // Find all User documents where mentorEmail is the logged-in user's email
+      const users = await User.find({ mentorEmail: mentorEmail }).lean();
   
       // For each user, find the related EvaluationFormDetails document where eformstates is 'created'
       const mentorDetails = [];
@@ -1003,11 +999,9 @@ exports.deleteeformData = async (req, res) => {
       res.status(500).json({ error: err.message });
     }
   };
-
   
 
   //this api to store mentor submiting details.
-
   exports.storeMentorScoresById = async (req, res) => {
     const { 
       coreValuesScoresMentor, 
@@ -1047,16 +1041,12 @@ exports.deleteeformData = async (req, res) => {
     }
   };
 
-
 //evaluator backend apis
-
 exports.getInternsByEvaluator = async (req, res) => {
   try {
-    const {id }=req.data;
-    const evaluator = await User.findById(id).lean();
-
-    const evaluatorName = evaluator.fname + " " + evaluator.lname;
-    const evaluationFormDetails = await EvaluationFormDetails.find({ evaluator: evaluatorName }).lean();
+    const { id } = req.data;
+    // No need to find the evaluator by name since we are using the evaluator's ID directly
+    const evaluationFormDetails = await EvaluationFormDetails.find({ evaluator_id: id }).lean();
     const userIds = evaluationFormDetails.map((doc) => doc.user);
     const users = await User.find({ _id: { $in: userIds } }).lean();
 
