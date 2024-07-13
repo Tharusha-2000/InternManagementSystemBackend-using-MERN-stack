@@ -85,13 +85,18 @@ exports.generateOTP = async (req, res, next) => {
 /* verifyOTP that email */
 exports.verifyOTP = async (req, res) => {
   const { code } = req.query;
+  
 
+  // Check if the OTP is valid
   if (parseInt(req.app.locals.OTP) === parseInt(code)) {
-    req.app.locals.OTP = null; // reset the OTP value
     req.app.locals.resetSession = true; // start session for reset password
-    return res.status(201).send({ msg: "Verify Successsfully!" });
+    res.status(201).send({ msg: "Verify Successsfully!" });
+  } else {
+    res.status(400).send({ msg: "Invalid OTP" });
   }
-  return res.status(400).send({ msg: "Invalid OTP" });
+
+  // Reset the OTP value regardless of whether it was valid or not
+  req.app.locals.OTP = null;
 };
 
 
