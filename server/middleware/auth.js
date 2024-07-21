@@ -108,7 +108,7 @@ async function IsEvaluatorORIsMentor(req, res, next){
     const {id} =req.data;
     const user = await User.findById(id);
 
-    if (user.role !== "evaluvator" && user.role !== "mentor") {
+    if (user.role !== "evaluator" && user.role !== "mentor" && user.role !== "admin") {
         return res
           .status(403)
           .json({ msg: "You do not have permission to access this function" });
